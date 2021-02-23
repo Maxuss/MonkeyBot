@@ -1,4 +1,4 @@
-# MONKEY
+# MONKEY BOT #
 # API-KEY in .env
 import requests
 import os
