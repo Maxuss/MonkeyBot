@@ -1,5 +1,6 @@
-# bot.py
-# API-KEY === 8192287c-a6e3-44d3-ad91-cd93256b9317
+####### MONKEYBOT
+# API KEY IN DOTENV
+# imports
 import requests
 import os
 import ndata
@@ -13,7 +14,7 @@ from discord.utils import get
 import discord
 from discord.ext import commands
 
-
+#useful variables
 f = open('data.json')
 TOKEN = str(os.environ.get('DISCORD_TOKEN'))
 API_KEY = str(os.environ.get('API_KEY'))
@@ -35,7 +36,7 @@ facts = [
     'Did you know MonkeyBot is developed using discord.py library?',
     'Did you know MonkeyBot was developed in less than one week?',
     'Did you know MonkeyBot was inspired by Jerry The Price Checker from SBZ?',
-    'Have you tried doing'
+    'Have you tried doing m!sb <player_name>?'
 ]
 
 #region emoji data
@@ -147,7 +148,7 @@ async def sb(ctx, nickname: str):
             time_took = str(round((time.time() - start_time), 3))
             tt = "Time taken on executing command: "
             timetook = time_took + " seconds!"
-
+            
             return_embed = discord.Embed(title=embed_header, description='', color=0xf5ad42)
             return_embed.add_field(name='Current Profile', value=embed_pinfo, inline=False)
             return_embed.add_field(name='Souls', value=embed_sinfo, inline=False)
@@ -229,7 +230,7 @@ async def sky(ctx, *, name: str):
     else:
         await prev.edit(content=error_response)
 #endregion sky
-#region gamble
+#region gamble !!!! STILL IN WIP !!!!
 @bot.command(name='sb_gamble', help='Gamble skyblock cus why not lol. Argument 1: "dungeon floor e.g: f5", "dragon", "slayer type. e.g: rev", "frag run: e.g: \'frag6\'. Available floor for frag running: frag6, frag7')
 async def gamble(ctx, arg):
     # LOOT FORMAT ==> "Loot name": [drop_chance(one in how much), drop_amount_min, drop_amount_max, cost]
