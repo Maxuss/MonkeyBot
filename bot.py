@@ -1,5 +1,5 @@
 # MONKEY BOT #
-# API-KEY in .env
+# API-KEY in .env #
 import requests
 import os
 import ndata
@@ -13,6 +13,10 @@ from discord.utils import get
 import discord
 from discord.ext import commands
 
+# reqs for the guild
+# MOVE TO .JSON!!!
+REQ_SA = 25
+REQ_SLAYER = 150000 
 
 f = open('data.json')
 TOKEN = str(os.environ.get('DISCORD_TOKEN'))
@@ -39,8 +43,14 @@ facts = [
     'Did you know MonkeyBot was inspired by Jerry The Price Checker from SBZ?',
     'Have you tried doing m!info?',
     'Skyblock is endless grind please end me.',
+    'Monkeys are actually smarter than people.',
+    'This Fact isn\'t fun :(.'
 ]
 
+def add_to_error():
+    z = ERROR_EXIT + 1
+    x = {"error_code": int(z)}
+    f.update(x)
 #region emoji data
 monke = '<a:monke:813481830766346311>'
 voidmoment = '<:voidmoment:813482195422806017>'
@@ -120,8 +130,96 @@ def chooseFact():
 @bot.event
 async def on_ready():
     activity = discord.Game(name=RPC_STATUS, type=3)
-    await bot.change_presence(status=discord.Status.idle, activity=activity)
+    await bot.change_presence(status=discord.Status.online, activity=activity)
     print("Bot is ready!")
+
+#region req
+@bot.command(name='reqs', help='Checks, if the player has requirements to join guild "Macaques".')
+async def reqs(ctx, nickname: str):
+    if nickname:
+        start_time = time.time()
+        lookstr = monke + 'Looking up for player ' + nickname + "'s reqs..." + FACT_STR + chooseFact()
+        prev = await ctx.send(lookstr)
+        try:
+            PLAYER_NAME = nickname
+            data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + PLAYER_NAME).json()
+            data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
+            SB_ID = next(iter(data_sb_PATH))
+            print(SB_ID)
+            mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
+            mojangr = requests.get(mojangu).json()
+            UUID = str(mojangr["id"])
+            print(UUID)
+            sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+SB_ID).json()
+            sb_profile = sb_data["profile"]["members"][UUID]
+            sb_z_lvl = int(sb_profile["slayer_bosses"]["zombie"]["xp"])
+            sb_t_lvl = int(sb_profile["slayer_bosses"]["spider"]["xp"])
+            sb_w_lvl = int(sb_profile["slayer_bosses"]["wolf"]["xp"])
+            sb_slayer_lvl = int((sb_t_lvl+sb_z_lvl+sb_w_lvl))
+            
+            sb_mining = data["player"]["achievements"]["skyblock_excavator"]
+            sb_farming = data["player"]["achievements"]["skyblock_harvester"]
+            sb_combat = data["player"]["achievements"]["skyblock_combat"]
+            sb_foraging = data["player"]["achievements"]["skyblock_gatherer"]
+            sb_enchanting = data["player"]["achievements"]["skyblock_augmentation"]
+            sb_alchemy = data["player"]["achievements"]["skyblock_concoctor"]
+            sb_fishing = data["player"]["achievements"]["skyblock_angler"]
+
+            sb_sum = (sb_mining + sb_farming + sb_combat + sb_foraging + sb_enchanting + sb_alchemy + sb_fishing)
+            sb_sa = round((sb_sum / 7), 1)
+
+            print(sb_sa)
+            print(sb_slayer_lvl)
+
+            if sb_sa >= REQ_SA:
+                sa_a = True
+                sa_msg = '✅Accepted. Level: ' + str(sb_sa)
+            else:
+                sa_a = False
+                sa_msg = '❌Unaccepted. Level: ' + str(sb_sa)
+            if sb_slayer_lvl >= REQ_SLAYER:
+                slayer_a = True
+                slayer_msg = '✅Accepted. Total XP: ' + str(sb_slayer_lvl)
+            else:
+                slayer_a = False
+                slayer_msg = '❌Unaccepted. Total XP: ' + str(sb_slayer_lvl)
+
+            if sa_a and slayer_a:
+                accepted = True
+                gtotal = 'User with name ' + nickname + ' acceptable to guild!'
+                e_h =  '✅User meets requirements!✅'
+            else:
+                accepted = False
+                gtotal = 'User with name ' + nickname + ' isn\'t acceptable to guild!'
+                e_h = '❌User doesn\'t meet requirements!❌'
+
+            sa_h = 'Skill Average:'
+            sl_h = 'Slayers:'
+            g_h = 'Conclusion'
+
+
+
+            time_took = str(round((time.time() - start_time), 3))
+            tt = "Time taken on executing command: "
+            timetook = time_took + " seconds!"
+
+            return_embed = discord.Embed(title=e_h, description='', color=0xf5ad42)
+            return_embed.add_field(name=sa_h, value=sa_msg, inline=False)
+            return_embed.add_field(name=sl_h, value=slayer_msg, inline=False)
+            return_embed.add_field(name=g_h, value=gtotal, inline=False)
+            return_embed.add_field(name=tt, value=timetook, inline=False)
+
+            await prev.edit(content='', embed=return_embed)
+            await prev.add_reaction(monkey_id)
+        except KeyError:
+            resp = 'Looks like there is some API errors! Try turning on/asking to turn on all the API in settings!'
+            embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+            await prev.edit(embed=embed_error, content='')
+    else:
+        resp = 'Invalid command syntaxis!'
+        embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+        await prev.edit(embed=embed_error, content='')
+#endregion req
 #region sb
 @bot.command(name='sb', help='Shows some data about skyblock profile. WIP for now.')
 async def sb(ctx, nickname: str):
@@ -170,8 +268,9 @@ async def sb(ctx, nickname: str):
 
 
             await prev.edit(content='', embed=return_embed)
-        except SyntaxError:
-            resp = 'Looks like there is no skyblock profiles for player ' + nickname
+            await prev.add_reaction(monkey_id)
+        except KeyError:
+            resp = 'Looks like there is some API errors! Try turning on all the API in settings! ' + nickname
             embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
             await prev.edit(embed=embed_error, content='')
     else:
