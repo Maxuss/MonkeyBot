@@ -1,6 +1,5 @@
-####### MONKEYBOT
-# API KEY IN DOTENV
-# imports
+# MONKEY
+# API-KEY in .env
 import requests
 import os
 import ndata
@@ -14,9 +13,11 @@ from discord.utils import get
 import discord
 from discord.ext import commands
 
-#useful variables
+
 f = open('data.json')
 TOKEN = str(os.environ.get('DISCORD_TOKEN'))
+RPC_STATUS = "with Hypixel Skyblock API"
+FACT_STR = "Fun Fact: "
 API_KEY = str(os.environ.get('API_KEY'))
 GUILD = str(os.environ.get('GUILD'))
 PLAYER_NAME = 'maxus_'
@@ -36,7 +37,8 @@ facts = [
     'Did you know MonkeyBot is developed using discord.py library?',
     'Did you know MonkeyBot was developed in less than one week?',
     'Did you know MonkeyBot was inspired by Jerry The Price Checker from SBZ?',
-    'Have you tried doing m!sb <player_name>?'
+    'Have you tried doing m!info?',
+    'Skyblock is endless grind please end me.',
 ]
 
 #region emoji data
@@ -111,12 +113,21 @@ def parsemoji(cutename: str):
         fruitmoji = emoj[16]
 #endregion parsing emojis
 
+def chooseFact():
+    fact = choice(facts)
+    return fact
+
+@bot.event
+async def on_ready():
+    activity = discord.Game(name=RPC_STATUS, type=3)
+    await bot.change_presence(status=discord.Status.idle, activity=activity)
+    print("Bot is ready!")
 #region sb
 @bot.command(name='sb', help='Shows some data about skyblock profile. WIP for now.')
 async def sb(ctx, nickname: str):
     if nickname:
         start_time = time.time()
-        lookstr = monke + 'Looking up for player ' + nickname + "..."
+        lookstr = monke + 'Looking up for player ' + nickname + "..." + FACT_STR + chooseFact()
         prev = await ctx.send(lookstr)
         try:
             PLAYER_NAME = nickname
@@ -126,15 +137,15 @@ async def sb(ctx, nickname: str):
             print(SB_ID)
             mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
             mojangr = requests.get(mojangu).json()
-            UUID = mojangr["id"]
+            UUID = str(mojangr["id"])
             print(UUID)
             sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+SB_ID).json()
             sb_cute_name = data_sb_PATH[SB_ID]["cute_name"]
             sb = sb_data["profile"]["members"][UUID]
             souls = str(sb["fairy_souls_collected"])
             deaths = str(sb["death_count"])
-            bank_money = round(sb["banking"]["balance"], 1)
-            purse_money = round(sb["coin_purse"], 1)
+            bank_money = int(sb_data["profile"]["banking"]["balance"])
+            purse_money = round(int(sb["coin_purse"]), 1)
             coins = str(bank_money + purse_money)
 
             parsemoji(sb_cute_name)
@@ -143,16 +154,17 @@ async def sb(ctx, nickname: str):
             embed_pinfo = "Profile Fruit - " + sb_cute_name + " " + fruitmoji
             embed_sinfo = "Fairy Souls collected - " + souls
             embed_dinfo = "Deaths - " + deaths
-            embed_cinfo = 
+            embed_cinfo = "Coins in purse - " + coins
 
             time_took = str(round((time.time() - start_time), 3))
             tt = "Time taken on executing command: "
             timetook = time_took + " seconds!"
-            
+
             return_embed = discord.Embed(title=embed_header, description='', color=0xf5ad42)
             return_embed.add_field(name='Current Profile', value=embed_pinfo, inline=False)
             return_embed.add_field(name='Souls', value=embed_sinfo, inline=False)
             return_embed.add_field(name='Deaths', value=embed_dinfo, inline=False)
+            return_embed.add_field(name='Coins', value=embed_cinfo, inline=False)
             return_embed.add_field(name=tt, value=timetook, inline=False)
 
 
@@ -174,7 +186,7 @@ async def bz(ctx, *, item: str):
     start_time = time.time()
     if item:
         current_item = item.replace(" ", "_").upper()
-        lookstr = monke + "Looking up for item " + current_item + "..."
+        lookstr = monke + "Looking up for item " + current_item + "..." + FACT_STR + chooseFact()
         prev = await ctx.send(lookstr)
         try:
             bz_item = bz_data["products"][current_item]
@@ -230,7 +242,7 @@ async def sky(ctx, *, name: str):
     else:
         await prev.edit(content=error_response)
 #endregion sky
-#region gamble !!!! STILL IN WIP !!!!
+#region gamble
 @bot.command(name='sb_gamble', help='Gamble skyblock cus why not lol. Argument 1: "dungeon floor e.g: f5", "dragon", "slayer type. e.g: rev", "frag run: e.g: \'frag6\'. Available floor for frag running: frag6, frag7')
 async def gamble(ctx, arg):
     # LOOT FORMAT ==> "Loot name": [drop_chance(one in how much), drop_amount_min, drop_amount_max, cost]
