@@ -7,3 +7,5 @@ I'm developing this bot for our Hypixel Guild's Discord server -> `Macaques`
 If you would ever want to donate, donate to my ko-fi: **[REDACTED/WIP]** 
 
 Don't forget to check updates.md sometimes! I post most update info here!
+
+Also check todo, it would be cool, thanks.
