@@ -1,5 +1,6 @@
 # MONKEY BOT #
 # API-KEY in .env #
+#region imports and data vars
 import requests
 import os
 import ndata
@@ -18,6 +19,7 @@ from discord.ext import commands
 REQ_SA = 25
 REQ_SLAYER = 150000 
 
+karma = open('karma.json')
 f = open('data.json')
 TOKEN = str(os.environ.get('DISCORD_TOKEN'))
 RPC_STATUS = "with Hypixel Skyblock API"
@@ -47,10 +49,7 @@ facts = [
     'This Fact isn\'t fun :(.'
 ]
 
-def add_to_error():
-    z = ERROR_EXIT + 1
-    x = {"error_code": int(z)}
-    f.update(x)
+#endregion imports and data vars
 #region emoji data
 monke = '<a:monke:813481830766346311>'
 voidmoment = '<:voidmoment:813482195422806017>'
@@ -122,7 +121,7 @@ def parsemoji(cutename: str):
     elif cutename=='Zucchini':
         fruitmoji = emoj[16]
 #endregion parsing emojis
-
+#region stuff
 def chooseFact():
     fact = choice(facts)
     return fact
@@ -132,7 +131,7 @@ async def on_ready():
     activity = discord.Game(name=RPC_STATUS, type=3)
     await bot.change_presence(status=discord.Status.online, activity=activity)
     print("Bot is ready!")
-
+#endregion stuff
 #region req
 @bot.command(name='reqs', help='Checks, if the player has requirements to join guild "Macaques".')
 async def reqs(ctx, nickname: str):
@@ -342,167 +341,224 @@ async def sky(ctx, *, name: str):
         await prev.edit(content=error_response)
 #endregion sky
 #region gamble
-@bot.command(name='sb_gamble', help='Gamble skyblock cus why not lol. Argument 1: "dungeon floor e.g: f5", "dragon", "slayer type. e.g: rev", "frag run: e.g: \'frag6\'. Available floor for frag running: frag6, frag7')
-async def gamble(ctx, arg):
-    # LOOT FORMAT ==> "Loot name": [drop_chance(one in how much), drop_amount_min, drop_amount_max, cost]
-    #region Dragon loot  
-    dragon_loot = { 
-        '{LVL 1} Ender Dragon <Epic>': [100, 1, 1, 84500000],
-        'Dragon Claw': [10, 1, 1, 1200000],
-        'Dragon Scale': [10, 1, 1, 1200000],
-        'Aspect Of The Dragons': [8, 1, 1, 2400000],
-        'Dragon Fragments': [1, 5, 25, 10000],
-        'Dragon Helmet': [4, 1, 1, 1000000],
-        'Dragon Chestplate': [4, 1, 1, 2500000],
-        'Dragon Leggings': [4, 1, 1, 2000000],
-        'Dragon Boots': [4, 1, 1, 1000000],
-    }
-    sup_only = {
-        '{LVL 1} Ender Dragon <Legendary>': [150, 1, 1, 400000000],
-        'Dragon Horn': [10, 1, 1, 8000000]
-    }
-    # TYPE FORMAT ==> "Type name": [loot_cost_multiplier]
-    dragon_types = { 
-        'Old': [0.5],
-        'Protector': [0.4],
-        'Young': [1.2],
-        'Strong': [1.5],
-        'Unstable': [1],
-        'Superior': [5],
-        'Wise': [1.6],
-    }
-    #endregion Dragon Loot
-
-    #region Slayer loot
-    rev = {
-        'Revenant Flesh': [1, 46, 64, 1],
-        'Foul Flesh': [5, 2, 4, 20000],
-        'Pestilence Rune I': [5, 1, 1, 2000],
-        'Undead Catalyst': [10, 1, 1, 10000],
-        'Smite VI Enchanted Book': [10, 1, 1, 10000],
-        'Beheaded Horror': [100, 1, 1, 50000],
-        'Revenant Catalyst': [10, 1, 1, 20000],
-        'Snake Rune I': [120, 1, 1, 100000],
-        'Scythe Blade': [255, 1, 1, 5000000]
-    }
-    tara = {
-        'Tarantula Web': [1, 46, 64, 10],
-        'Toxic Arrow Poison': [5, 46, 64, 5000],
-        'Bite Rune I': [5, 1, 1, 25000],
-        'Spider Catalyst': [10, 1, 1, 5000],
-        'Bane of Arthropods VI Enchanted Book': [100, 1, 1, 10000],
-        'Fly Swatter': [],
-        'Tarantula Talisman': [],
-        'Digested Mosquito': [],
-    }
-    sven = {
-        'Wolf Teeth': [],
-        'Hamster Wheel': [],
-        'Spirit Rune I': [],
-        'Critical VI Enchanted Book': [],
-        'Red Claw Egg': [],
-        'Couture Rune I': [],
-        'Overflux Capacitor': [],
-        'Grizzly Bait': [],
-    }
-    #endregion Slayer loot
-
+@bot.command(name='dungeon', help='Run dungeons cus why not lol. Argument 1 is floor, f1-f7. Argument 2 is Boolean(True/False), it showsm whenether you are going to do frag runs. WORKS ONLY ON F6-F7')
+async def dungeons(ctx, floor:str, frag=None):
     #region Dungeon Loot
-
-    everywhere = {
-        'Trash Books': [],
-        'Necromancer\'s Brooch': [],
-        'Combo I Enchanted Book': [],
-        'Ultimate Wise I Enchanted Book': [],
-        'Lethality VI Enchanted Book': [],
-        'Hot Potato Book': [],
-        'Fuming Potato Book': [],
-        'Recombobulator 3000': [],
-        'Wisdom I Enchanted Book': [],
-    }
+    # DUNGEON LOOT SYNTAX ==> 'type': [name, chance, amount_min, amount_max, cost, cost_from_chest_multiplier] 
     f1 = {
-        'Bonzo\'s Staff': [],
-        'Bonzo\'s Mask': [],
-        'Red Nose': [],
+        '0': ['Bonzo\'s Staff', 69, 1, 1, 1500000, 1000000],
+        '1': ['Bonzo\'s Mask', 35, 1, 1, 500000, 1000000],
+        '2': ['Red Nose', 10, 1, 1, 25000, 10000],
     }
     f2 = {
-        'Scarf Studies': [],
-        'Adaptive Blade': [],
+        '0': ['Scarf Studies', 10, 1, 1, 300000, 10000],
+        '1': ['Adaptive Blade', 25, 1, 1, 1000000, 250000],
     }
     f3 = {
-        'Adaptive Boots': [],
-        'Adaptive Helmet': [],
-        'Adaptive Chestplate': [],
-        'Adaptive Leggings': [],
+        '0': ['Adaptive Boots', 10, 1, 1, 500000, 500000],
+        '1': ['Adaptive Helmet', 10, 1, 1, 500000, 500000],
+        '2': ['Adaptive Chestplate', 50, 1, 1, 3000000, 1000000],
+        '3': ['Adaptive Leggings', 50, 1, 1, 1000000, 1000000],
     }
     f4 = {
-        'Rend I Enchanted Book': [],
-        '{LVL 1} Spirit Pet <Epic>': [],
-        '{LVL 1} Spirit Pet <Legendary>': [],
-        'Spirit Bone': [],
-        'Spirit Boots': [],
-        'Spirit Wing': [],
-        'Spirit Bow': [],
-        'Spirit Sword': [],
+        '0': ['Rend I Enchanted Book', 15, 1, 1, 250000, 100000],
+        '1': ['[LVL 1] Spirit Pet <Epic>', 25, 1, 1, 500000, 100000],
+        '2': ['[LVL 1] Spirit Pet <Legendary>', 25, 1, 1, 1000000, 100000],
+        '3': ['Spirit Bone', 23, 1, 2, 4500000, 500000],
+        '4': ['Spirit Boots', 23, 1, 1, 1000000, 1000000],
+        '5': ['Spirit Wing', 23, 1, 1, 2100000, 2000000],
+        '6': ['Spirit Bow', 50, 1, 1, 1000000, 1000000],
+        '7': ['Spirit Sword', 50, 1, 1, 1000000, 1000000],
     }
     f5 = {
-        'Overload I Enchanted Book': [],
-        'Shadow Assassin Boots': [],
-        'Shadow Assassin Leggings': [],
-        'Shadow Assassin Chestplate': [],
-        'Shadow Assassin Helmet': [],
-        'Livid Dagger': [],
-        'Warped Stone': [],
-        'Last Breath': [],
-        'Shadow Fury': [],
+        '0': ['Overload I Enchanted Book', 5, 1, 1, 50000, 0],
+        '1': ['Shadow Assassin Boots', 15, 1, 1, 2000000, 500000],
+        '2': ['Shadow Assassin Leggings', 15, 1, 1, 2000000, 500000],
+        '3': ['Shadow Assassin Chestplate', 100, 1, 1, 25000000, 2000000],
+        '4': ['Shadow Assassin Helmet', 15, 1, 1, 2000000, 500000],
+        '5': ['Livid Dagger', 30, 1, 1,  7000000, 3000000],
+        '6': ['Warped Stone', 30, 1, 1,  400000, 300000],
+        '7': ['Last Breath', 40, 1, 1,  9000000, 3000000],
+        '8': ['Shadow Fury', 50, 1, 1,  14000000, 5000000],
     }
     f6 = {
-        'Giant\'s Tooth': [],
-        'Ancient Rose': [],
-        'Necromancer Sword': [],
-        'Giant\'s Sword': [],
-        'Precursor Eye': [],
-        'Necromancer Lord Helmet': [],
-        'Necromancer Lord Chestplate': [],
-        'Necromancer Lord Leggings': [],
-        'Necromancer Lord Boots': [],
-        'Summonning Ring': [],
+        '0': ['Giant\'s Tooth', 5, 1, 1, 500000, 0],
+        '1': ['Ancient Rose', 10, 1, 3, 700000, 200000],
+        '2': ['Necromancer Sword', 40, 1, 1,  4000000, 6000000],
+        '3': ['Giant\'s Sword', 50, 1, 1,  14000000, 5000000],
+        '4': ['Precursor Eye', 80, 1, 1,  20000000, 10000000],
+        '5': ['Necromancer Lord Helmet', 20, 1, 1, 2000000, 500000],
+        '6': ['Necromancer Lord Chestplate', 100, 1, 1, 15000000, 8000000],
+        '7': ['Necromancer Lord Leggings', 20, 1, 1, 2000000, 500000],
+        '8': ['Necromancer Lord Boots', 20, 1, 1, 2000000, 500000],
+        '9': ['Summonning Ring', 100, 1, 1, 10000000, 8000000],
     }
     f7 = {
-        'Soul Eater I Enchanted Book': [],
-        'Precursor Gear': [],
-        'Wither Catalyst': [],
-        'Wither Blood': [],
-        'Wither Chestplate': [],
-        'Wither Helmet': [],
-        'Wither Leggings': [],
-        'Wither Boots': [],
-        'Wither Cloak Sword': [],
-        'Wither Scroll': []
+        '0': ['Soul Eater I Enchanted Book', 10, 1, 1, 1500000, 1000000],
+        '1': ['Precursor Gear', 5, 1, 1, 500000, 300000],
+        '2': ['Wither Catalyst', 2, 1, 4, 500000, 100000],
+        '3': ['Wither Blood', 5, 1, 1, 1000000, 800000],
+        '4': ['Wither Chestplate', 200, 1, 1, 50000000, 15000000],
+        '5': ['Wither Helmet', 25, 1, 1, 2000000, 1000000],
+        '6': ['Wither Leggings', 25, 1, 1, 10000000, 5000000],
+        '7': ['Wither Boots', 25, 1, 1, 2000000, 1000000],
+        '8': ['Wither Cloak Sword', 60, 1, 1, 8000000, 5000000],
+        '9': ['Wither Scroll', 60, 1, 1, 60000000, 10000000],
+        '10': ['Necron\'s Handle', 250, 1, 1, 398000000, 15000000],
     }
     #endregion Dungeon Loot
-
+    #FRAG RUNS TYPE SYNTAXIS==> [name, chance, price]
     #region Frag Runs Loot
     frag6 = {
-        'Livid Fragment': [],
-        'Bonzo Fragment': [],
-        'Scarf Fragment': [],
+        '0': ['Livid Fragment', 5, 250000],
+        '1': ['Bonzo Fragment', 1, 50000],
+        '2': ['Scarf Fragment', 2, 70000],
+        '3': ['Ancient Rose', 9, 700000],
     }
     frag7 = {
-        'L.A.S.R. Eye': [],
-        'Diamante\'s Handle': [],
-        'Jolly Pink Rock': [],
-        'Bigfoot\'s lasso': []
+        '0': ['L.A.S.R. Eye', 5, 800000],
+        '1': ['Diamante\'s Handle', 9, 1200000],
+        '2': ['Jolly Pink Rock', 2, 20000],
+        '3': ['Bigfoot\'s lasso', 2, 40000],
     }
     #endregion Frag Runs Loot
-    await ctx.send("This command is WIP!")
-    # The CODE
     
-    #parsing argument
-    grinding = arg
-    # Moved argument to grinding so
-    # we can use it later more easily
-    # EDIT01: Fixed insane if-elif structure
+    f1_d = 'Floor 1 run'
+    f2_d = 'Floor 2 run'
+    f3_d = 'Floor 3 run'
+    f4_d = 'Floor 4 run'
+    f5_d = 'Floor 5 run'
+    f6_d = 'Floor 6 run'
+    f7_d = 'Floor 7 run'
+
+    fr6_d = 'Frag run on Floor 6'
+    fr7_d = 'Frag run on Floor 7'
+    waiting = monke + 'Gambling, please wait... ' + chooseFact()
+    prev = await ctx.send(waiting)
+    start_time = time.time()
+    if floor:
+        if floor == 'f1':
+            flt = f1
+            fstr = f1_d
+        elif floor == 'f2':
+            flt = f2
+            fstr = f2_d
+        elif floor == 'f3':
+            flt = f3
+            fstr = f3_d
+        elif floor == 'f4':
+            flt = f4
+            fstr = f4_d
+        elif floor == 'f5':
+            flt = f5
+            fstr = f5_d
+        elif floor == 'f6':
+            flt = f6
+            fstr = f6_d
+        elif floor == 'f7':
+            flt = f7
+            fstr = f7_d
+        else:
+            resp = 'Invalid Floor!'
+            embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+            await prev.edit(embed=embed_error, content='')
+        while True:
+            if frag:
+                if flt == f6:
+                    flt = frag6
+                    fstr = fr6_d
+                    break
+                elif flt == f7:
+                    flt = frag7
+                    fstr = fr7_d
+                    break
+                else:
+                    resp = 'You can\'t frag run this floor!'
+                    embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+                    await prev.edit(embed=embed_error, content='')
+                    break
+            else:
+                break
+            
+        i = 0
+        r = 0
+        d = {}
+        chest_cost = 100000
+
+        for i in flt:
+            stri = str(i)
+            if flt == frag6 or flt == frag7:
+                minim = 1
+                maxim = flt[stri][1]
+                random_drop = randint(minim, maxim)
+                if random_drop == maxim:
+                    d["drop{0}".format(i)] = stri
+            else:
+                minim = 1
+                maxim = flt[stri][1]
+                random_drop = randint(minim, maxim)
+                if random_drop == maxim:
+                    d["drop{0}".format(i)] = stri 
+    
+        i = 0
+        money = 0
+        list_ids = []
+        for i in d.values():
+            if i in d.values():
+                if flt == frag6 or flt == frag7:
+                    money += flt[d["drop{0}".format(i)]][2]
+                    item_str = str(flt[d["drop{0}".format(i)]][0])
+                    list_ids.append(item_str)
+                else:
+                    chest_cost += flt[d["drop{0}".format(i)]][5]
+                    minim = flt[d["drop{0}".format(i)]][2]
+                    maxim = flt[d["drop{0}".format(i)]][3]
+                    amount = randint(minim, maxim)
+                    item_str = str(flt[d["drop{0}".format(i)]][0])
+                    money += ((flt[d["drop{0}".format(i)]][4]*amount) - chest_cost)
+                    list_ids.append(item_str)
+        
+        time_took = str(round((time.time() - start_time), 3))
+        tt = "Time taken on executing command: "
+        timetook = time_took + " seconds!"
+        items_str = ('\n'.join(map(str, list_ids)))
+
+
+        f1_d = 'Floor 1 run'
+        f2_d = 'Floor 2 run'
+        f3_d = 'Floor 3 run'
+        f4_d = 'Floor 4 run'
+        f5_d = 'Floor 5 run'
+        f6_d = 'Floor 6 run'
+        f7_d = 'Floor 7 run'
+
+        fr6_d = 'Frag run on Floor 6'
+        fr7_d = 'Frag run on Floor 7'
+
+        embed_run = 'You did a ' + fstr + '!'
+        embed_profit = 'Your total profit is ' + str(money) + ' coins!'
+        if list_ids:
+            embed_items = 'You got: \n' +  items_str
+        else:
+            embed_items = 'You got nothing useful this run :('
+        
+        embed_header = 'Dungeon Run Simulator'
+
+        return_embed = discord.Embed(title=embed_header, description='', color=0xf5ad42)
+        return_embed.add_field(name='Run Info', value=embed_run, inline=False)
+        return_embed.add_field(name='Profit', value=embed_profit, inline=False)
+        return_embed.add_field(name='Items', value=embed_items, inline=False)
+        return_embed.add_field(name=tt, value=timetook, inline=False)
+
+        await prev.edit(embed=return_embed, content='')
+        
+    else:
+        resp = 'Invalid command syntaxis!'
+        embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+        await prev.edit(embed=embed_error, content='')
+    
+
+
 #endregion gamble
 #region client
 @client.event
@@ -517,5 +573,6 @@ async def on_message(message):
     else:
         return
 #endregion client
+#region START
 bot.run(TOKEN)
-client.run(TOKEN)
+#endregion START
