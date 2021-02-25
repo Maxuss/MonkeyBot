@@ -1,5 +1,6 @@
 {
     "version": "0.0.5",
     "author": "maxus",
-    "error_code": 310
+    "error_code": 310,
+    "dev_mode": 0
 }

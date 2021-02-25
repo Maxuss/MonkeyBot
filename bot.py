@@ -19,11 +19,18 @@ from discord.ext import commands
 REQ_SA = 25
 REQ_SLAYER = 150000 
 
-karma = open('karma.json')
-f = open('data.json')
+with open('data.json', 'r') as mf:
+    f = mf.read()
+
+obj = json.loads(f)
+
+
+
+
 TOKEN = str(os.environ.get('DISCORD_TOKEN'))
-RPC_STATUS = "with Hypixel Skyblock API"
+RPC_STATUS = "m!help"
 FACT_STR = "Fun Fact: "
+DEV = str(os.environ.get('DEV'))
 API_KEY = str(os.environ.get('API_KEY'))
 GUILD = str(os.environ.get('GUILD'))
 PLAYER_NAME = 'maxus_'
@@ -48,7 +55,6 @@ facts = [
     'Monkeys are actually smarter than people.',
     'This Fact isn\'t fun :(.'
 ]
-
 #endregion imports and data vars
 #region emoji data
 monke = '<a:monke:813481830766346311>'
@@ -131,6 +137,8 @@ async def on_ready():
     activity = discord.Game(name=RPC_STATUS, type=3)
     await bot.change_presence(status=discord.Status.online, activity=activity)
     print("Bot is ready!")
+
+
 #endregion stuff
 #region req
 @bot.command(name='reqs', help='Checks, if the player has requirements to join guild "Macaques".')
@@ -235,6 +243,7 @@ async def sb(ctx, nickname: str):
             mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
             mojangr = requests.get(mojangu).json()
             UUID = str(mojangr["id"])
+            true_name = data["player"]["knownAliases"][-1]
             print(UUID)
             sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+SB_ID).json()
             sb_cute_name = data_sb_PATH[SB_ID]["cute_name"]
@@ -247,7 +256,7 @@ async def sb(ctx, nickname: str):
 
             parsemoji(sb_cute_name)
 
-            embed_header = "Found player " + PLAYER_NAME + "'s skyblock profile!"
+            embed_header = "Found player " + true_name + "'s skyblock profile!"
             embed_pinfo = "Profile Fruit - " + sb_cute_name + " " + fruitmoji
             embed_sinfo = "Fairy Souls collected - " + souls
             embed_dinfo = "Deaths - " + deaths
@@ -270,6 +279,10 @@ async def sb(ctx, nickname: str):
             await prev.add_reaction(monkey_id)
         except KeyError:
             resp = 'Looks like there is some API errors! Try turning on all the API in settings! ' + nickname
+            embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+            await prev.edit(embed=embed_error, content='')
+        except TypeError:
+            resp = 'Hmm. Maybe player with that nickname doesn\'t exist? Couldn\'t get this player\'s api! Name: "' + nickname + '"'
             embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
             await prev.edit(embed=embed_error, content='')
     else:
@@ -332,11 +345,12 @@ async def bz(ctx, *, item: str):
 #endregion bzp
 #region sky
 @bot.command(name='sky', help='Show sky.shiiyu.moe profile for player! Syntaxis: m!sky (nickname)')
-async def sky(ctx, *, name: str):
+async def sky(ctx, name=None):
+    prev = await ctx.send(monke + 'Wait a second... Fun fact: ' + chooseFact())
     if name:
         await asyncio.sleep(0.3)
-        skylink = "https://sky.shiiyu.moe/stats/" + name 
-        await ctx.send(skylink)
+        skylink = "https://sky.shiiyu.moe/stats/" + name.lower()
+        await prev.edit(content=skylink)
     else:
         await prev.edit(content=error_response)
 #endregion sky
@@ -561,18 +575,56 @@ async def dungeons(ctx, floor:str, frag=None):
 
 #endregion gamble
 #region client
-@client.event
+@bot.event
 async def on_message(message):
-    if message.author == client.user:
+    await bot.process_commands(message)
+    if message.author == bot.user:
         return
-    
-    
-    if 'monke' in message.content:
+    if 'good bot' in message.content.lower():
+        resp = 'Thanks!\nIf you wish to know more about me, visit my GitHub Repository: https://github.com/Maxuss/MonkeyBot/\nThere\'s lots of cool information about me!'
+        await message.channel.send(resp)
+    elif 'monke' in message.content.lower():
         resp = 'oo oo aa aa monke'
         await message.channel.send(resp)
-    else:
-        return
+    elif 'macaque' in message.content.lower():
+        resp = 'macaques on top!'
+        await message.channel.send(resp)
 #endregion client
-#region START
+#region DEV_CMDS
+#region confirm dev
+@bot.command(name='confirm_dev', help='Confirms that you are me... Only works with me tho')
+async def confirm_dev(ctx):
+    dev = obj["dev_mode"]
+    if dev != 1:
+        verstr = 'I have sent verification input to console!'
+        a = await ctx.send(verstr)
+        inputa = input('INPUT DEV CODE HERE')
+        if inputa == DEV or inputa == 'DEV':
+            await a.edit(content='Access to dev commands granted to this server! Be careful!')
+            obj["dev_mode"] = 1
+            dev = obj["dev_mode"]
+        else:
+            await a.edit(content='BLOCKED!')
+    else:
+        verstr = 'You have already granted dev access to this server! Do m!stop_dev to cancel it!'
+        await ctx.send(verstr)
+@bot.command(name='stop_dev', help='Stops dev access for current server...')
+async def stop_dev(ctx):
+    dev = obj["dev_mode"]
+    if dev != 1:
+        verstr = 'Access denied!'
+        await ctx.send(verstr)
+    else:
+        verstr = 'I have sent verification input to console!'
+        a = await ctx.send(verstr)
+        inputa = input('INPUT DEV CODE HERE')
+        if inputa == DEV or inputa == 'DEV':
+            await a.edit(content='No longer in dev mode!')
+            obj["dev_mode"] 
+            dev = obj["dev_mode"]
+        else:
+            await a.edit(content='BLOCKED')
+#endregion confirm dev
+#endregion DEV_CMDS
+
 bot.run(TOKEN)
-#endregion START
