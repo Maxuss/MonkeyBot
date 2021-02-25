@@ -60,6 +60,7 @@ facts = [
 monke = '<a:monke:813481830766346311>'
 voidmoment = '<:voidmoment:813482195422806017>'
 monkey_id = '<:monkey~1:813495959639556198>'
+pog = '<:Monkey_Pog:781768342112436284>'
 #endregion emoji data
 #region parsing emojis
 def parsemoji(cutename: str):
@@ -574,22 +575,22 @@ async def dungeons(ctx, floor:str, frag=None):
 
 
 #endregion gamble
-#region client
+#region respond
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
     if message.author == bot.user:
         return
     if 'good bot' in message.content.lower():
-        resp = 'Thanks!\nIf you wish to know more about me, visit my GitHub Repository: https://github.com/Maxuss/MonkeyBot/\nThere\'s lots of cool information about me!'
+        resp = pog +'Thanks!\nIf you wish to know more about me, visit my GitHub Repository: https://github.com/Maxuss/MonkeyBot/\nThere\'s lots of cool information about me!'
         await message.channel.send(resp)
     elif 'monke' in message.content.lower():
-        resp = 'oo oo aa aa monke'
+        resp = 'oo oo aa aa monke' + pog + pog + pog
         await message.channel.send(resp)
     elif 'macaque' in message.content.lower():
         resp = 'macaques on top!'
         await message.channel.send(resp)
-#endregion client
+#endregion respond
 #region DEV_CMDS
 #region confirm dev
 @bot.command(name='confirm_dev', help='Confirms that you are me... Only works with me tho')
