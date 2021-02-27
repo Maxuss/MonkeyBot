@@ -9,6 +9,7 @@ import time
 import asyncio
 import base64, zlib
 import json
+from keepon import keep_alive
 from random import *
 from discord.utils import get
 import discord
@@ -26,7 +27,8 @@ obj = json.loads(f)
 
 
 
-
+ANTISPAM = obj["antispam"]
+AS_TIME = obj["antispam_time"]
 TOKEN = str(os.environ.get('DISCORD_TOKEN'))
 RPC_STATUS = "m!help"
 FACT_STR = "Fun Fact: "
@@ -56,6 +58,7 @@ facts = [
     'This Fact isn\'t fun :(.'
 ]
 #endregion imports and data vars
+
 #region emoji data
 monke = '<a:monke:813481830766346311>'
 voidmoment = '<:voidmoment:813482195422806017>'
@@ -129,6 +132,8 @@ def parsemoji(cutename: str):
         fruitmoji = emoj[16]
 #endregion parsing emojis
 #region stuff
+
+
 def chooseFact():
     fact = choice(facts)
     return fact
@@ -575,8 +580,35 @@ async def dungeons(ctx, floor:str, frag=None):
 
 
 #endregion gamble
+#region eat
+@bot.command(name='eat', help='Monke eat. Banana/Coconut/Rolety')
+async def eat(ctx, *, food):
+    voidid = '<@381827687775207424>'
+    lookstr = 'Monke hungry'
+    prev = await ctx.send(lookstr)
+    if not food:
+        await prev.edit(content='', embed=embed_error,)
+    else:
+        if 'banana' in food.lower():
+            resp = 'yummy yummy monke love bananas ' + pog
+        elif 'coco' in food.lower():
+            resp = 'monke love green coconuts yummy yummy ' + pog
+        elif 'rolet' in food.lower():
+            resp = 'peepeepoopoo :P'
+        elif 'void' in food.lower():
+            resp = 'What a non lets ping him lol.'
+            resp2 = voidid + ' Get pinged lol noob.'
+        else:
+            resp = 'monke not like this'
+
+        await prev.edit(content=resp)
+        if resp2:
+            await ctx.send(content=resp2)
+            
+#endregion eat
 #region respond
 @bot.event
+  
 async def on_message(message):
     await bot.process_commands(message)
     if message.author == bot.user:
@@ -626,6 +658,8 @@ async def stop_dev(ctx):
         else:
             await a.edit(content='BLOCKED')
 #endregion confirm dev
+
 #endregion DEV_CMDS
 
+keep_alive()
 bot.run(TOKEN)
