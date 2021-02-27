@@ -7,9 +7,8 @@ import ndata
 import mcuuid
 import time
 import asyncio
-import base64, zlib
+from decouple import config
 import json
-from keepon import keep_alive
 from random import *
 from discord.utils import get
 import discord
@@ -29,12 +28,12 @@ obj = json.loads(f)
 
 ANTISPAM = obj["antispam"]
 AS_TIME = obj["antispam_time"]
-TOKEN = str(os.environ.get('DISCORD_TOKEN'))
+TOKEN = str(config('DISCORD_TOKEN'))
 RPC_STATUS = "m!help"
 FACT_STR = "Fun Fact: "
-DEV = str(os.environ.get('DEV'))
-API_KEY = str(os.environ.get('API_KEY'))
-GUILD = str(os.environ.get('GUILD'))
+DEV = str(config('DEV'))
+API_KEY = str(config('API_KEY'))
+GUILD = str(config('GUILD'))
 PLAYER_NAME = 'maxus_'
 error_response = "Invalid command syntaxis!"
 client = discord.Client()
@@ -58,7 +57,7 @@ facts = [
     'This Fact isn\'t fun :(.'
 ]
 #endregion imports and data vars
-
+print 
 #region emoji data
 monke = '<a:monke:813481830766346311>'
 voidmoment = '<:voidmoment:813482195422806017>'
@@ -155,7 +154,7 @@ async def reqs(ctx, nickname: str):
         prev = await ctx.send(lookstr)
         try:
             PLAYER_NAME = nickname
-            data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + PLAYER_NAME).json()
+            data = requests.get("https://api.hypixel.net/player?key="+API_KEY + "&name=" + PLAYER_NAME).json()
             data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
             SB_ID = next(iter(data_sb_PATH))
             print(SB_ID)
@@ -614,7 +613,7 @@ async def on_message(message):
     if message.author == bot.user:
         return
     if 'good bot' in message.content.lower():
-        resp = pog +'Thanks!\nIf you wish to know more about me, visit my GitHub Repository: https://github.com/Maxuss/MonkeyBot/\nThere\'s lots of cool information about me!'
+        resp = pog +'Thanks!\nIf you wish to know more about me, visit my GitHub Repository: https://github.com/Maxuss/MonkeyBot/\nThere\'s lots of cool information about me!\nMy creator also has a Patreon page! You can check him out there https://www.patreon.com/maxus_ '
         await message.channel.send(resp)
     elif 'monke' in message.content.lower():
         resp = 'oo oo aa aa monke' + pog + pog + pog
@@ -660,6 +659,24 @@ async def stop_dev(ctx):
 #endregion confirm dev
 
 #endregion DEV_CMDS
+#region info
+@bot.command(name='info', help='Shows some useful info about bot')
+async def info(ctx):
+    embed_patrons = 'No one yet :('
+    embed_main = 'This is a bot developed by ```Void Moment#8152``` for guild Macaques! \nIt can do some stuff related to Hypixel Skyblock. \nUse m!help for info about commands!'
+    embed_ph = 'My Patreon:'
+    embed_patre = 'I have a patreon, so if you want to support my work and help me host the bot you can donate! [Link](https://www.patreon.com/maxus_)'
+    embed_cp = 'Current Patrons:'
+    embed_mh = 'MonkeyBot by VoidMoment aka maxus'
+    embed_mih = 'Main info you need to know:'
 
-keep_alive()
+    return_embed = discord.Embed(title=embed_mh, description='', color=0xf5ad42)
+    return_embed.add_field(name=embed_mih, value=embed_main, inline=False)
+    return_embed.add_field(name=embed_ph, value=embed_patre, inline=False)
+    return_embed.add_field(name=embed_cp, value=embed_patrons, inline=False)
+
+    await ctx.send(embed=return_embed)
+
+#endregion info
+
 bot.run(TOKEN)
