@@ -7,8 +7,8 @@
 
     `m!info`
 
-### CLOUD HOST
+## CLOUD HOST
 Now bot will be on 24/7!
 
-### WHAT'S NEXT?
+## WHAT'S NEXT?
 I'm working on ah command. wait
