@@ -630,7 +630,7 @@ async def confirm_dev(ctx):
     if dev != 1:
         verstr = 'I have sent verification input to console!'
         a = await ctx.send(verstr)
-        inputa = input('INPUT DEV CODE HERE')
+        inputa = 'cock'
         if inputa == DEV or inputa == 'DEV':
             await a.edit(content='Access to dev commands granted to this server! Be careful!')
             obj["dev_mode"] = 1
@@ -649,7 +649,7 @@ async def stop_dev(ctx):
     else:
         verstr = 'I have sent verification input to console!'
         a = await ctx.send(verstr)
-        inputa = input('INPUT DEV CODE HERE')
+        inputa = 'cock'
         if inputa == DEV or inputa == 'DEV':
             await a.edit(content='No longer in dev mode!')
             obj["dev_mode"] 
