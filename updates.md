@@ -1,14 +1,13 @@
 # VER. 0.2.1 CHANGES
 
 ## NEW COMMAND
-    `m!eat [food]`
+`m!prefix [prefix]`
 
-    Monke eat food oo aa
+Changes prefix of bot. Finally.
 
-    `m!info`
+## FIX OF SB AND REQS COMMANDS
 
-## CLOUD HOST
-Now bot will be on 24/7!
+Now they function properly and display current profile :D!
 
 ## WHAT'S NEXT?
-I'm working on ah command. wait
+I'm working on ah command. wait pls. also small bugfixes soon

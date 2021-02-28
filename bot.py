@@ -1,134 +1,96 @@
 # MONKEY BOT #
-# API-KEY in .env #
-#region imports and data vars
-import requests
-import os
-import ndata
-import mcuuid
-import time
-import asyncio
+#
+# Please check todo list sometimes
+# There are lots of stuff.
+# If you find an issue, open issue, please!
+# Thanks!
+# 
+# MonkeyBot by maxus aka Maxuss aka Void Moment#8152 (c)
+#
+
+
+
+
+#region imports
+import requests, os, time, asyncio, json, discord, pretty_errors, datetime
 from decouple import config
-import json
 from random import *
 from discord.utils import get
-import discord
 from discord.ext import commands
+from data_vars import *
+#endregion imports
+#region prefix
 
-# reqs for the guild
-# MOVE TO .JSON!!!
-REQ_SA = 25
-REQ_SLAYER = 150000 
+def get_prefix(client, message):
+    with open('prefixes.json', 'r') as o:
+        prefixes = json.load(o)
 
-with open('data.json', 'r') as mf:
-    f = mf.read()
+    return prefixes[str(message.guild.id)]
 
-obj = json.loads(f)
+bot = commands.Bot(command_prefix=get_prefix)
 
+@bot.event
+async def on_guild_join(guild):
+    with open('prefixes.json', 'r') as o:
+        prefixes = json.load(o)
 
+    prefixes[str(guild.id)] = 'm!'
 
-ANTISPAM = obj["antispam"]
-AS_TIME = obj["antispam_time"]
-TOKEN = str(config('DISCORD_TOKEN'))
-RPC_STATUS = "m!help"
-FACT_STR = "Fun Fact: "
-DEV = str(config('DEV'))
-API_KEY = str(config('API_KEY'))
-GUILD = str(config('GUILD'))
-PLAYER_NAME = 'maxus_'
-error_response = "Invalid command syntaxis!"
-client = discord.Client()
-bot = commands.Bot(command_prefix='m!')
-data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + PLAYER_NAME).json()
-bz_data = requests.get("https://api.hypixel.net/skyblock/bazaar?key=" + API_KEY).json()
-auc_data = requests.get("https://api.hypixel.net/skyblock/auctions").json()
-data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
-ah = auc_data["auctions"]
-resp = '!'
-embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
-cutename = ''
-facts = [
-    'Did you know MonkeyBot is developed on Python?',
-    'Did you know MonkeyBot is developed using discord.py library?',
-    'Did you know MonkeyBot was developed in less than one week?',
-    'Did you know MonkeyBot was inspired by Jerry The Price Checker from SBZ?',
-    'Have you tried doing m!info?',
-    'Skyblock is endless grind please end me.',
-    'Monkeys are actually smarter than people.',
-    'This Fact isn\'t fun :(.'
-]
-#endregion imports and data vars
-print 
-#region emoji data
-monke = '<a:monke:813481830766346311>'
-voidmoment = '<:voidmoment:813482195422806017>'
-monkey_id = '<:monkey~1:813495959639556198>'
-pog = '<:Monkey_Pog:781768342112436284>'
-#endregion emoji data
+    with open('prefixes.json', 'w') as o:
+        json.dump(prefixes, o, indent=4)
+
+@bot.event
+async def on_guild_remove(guild):
+    with open('prefixes.json', 'r') as o:
+        prefixes = json.load(o)
+    
+    prefixes.pop(str(guild.id))
+
+    with open('prefixes.json', 'w') as o:
+        json.dump(prefixes, o, indent=4)
+
+@bot.command(name='prefix',help='Changes prefix for current server.')
+async def ser_prefix(ctx, *, prefix:str):
+    if prefix:
+        with open('prefixes.json', 'r') as o:
+            prefixes = json.load(o)
+
+        prefixes[str(ctx.guild.id)] = prefix
+
+        with open('prefixes.json', 'w') as o:
+            json.dump(prefixes, o, indent=4)
+    else:
+        resp = 'Invalid command syntax!'
+        await ctx.send(embed=embed_error)
+#endregion prefix
 #region parsing emojis
+# Pog no more yansim-styled elif cycle
 def parsemoji(cutename: str):
     global fruitmoji
-    emoj = [
-        '🍎',
-        '🍌',
-        '🍒',
-        '🥥',
-        '🥒', 
-        '🍇', 
-        '🥝', 
-        '🍋',  
-        '🥭', 
-        '🍊',  
-        '🍑', 
-        '🍐', 
-        '🍍', 
-        '🍓', 
-        '🍅',
-        '🍉',
-        '🥬',
-    ]
-    #the cycle for parsing:::
-    if cutename=='Apple':
-        fruitmoji = emoj[0]
-    elif cutename=='Banana':
-        fruitmoji = emoj[1]
-    elif cutename=='Blueberry':
-        fruitmoji = emoj[2]
-    elif cutename=='Coconut':
-        fruitmoji = emoj[3]
-    elif cutename=='Cucumber':
-        fruitmoji = emoj[4]
-    elif cutename=='Grapes':
-        fruitmoji = emoj[5]
-    elif cutename=='Kiwi':
-        fruitmoji = emoj[6]
-    elif cutename=='Lemon':
-        fruitmoji = emoj[7]
-    elif cutename=='Lime':
-        fruitmoji = emoj[7]
-    elif cutename=='Mango':
-        fruitmoji = emoj[8]
-    elif cutename=='Orange':
-        fruitmoji = emoj[9]
-    elif cutename=='Papaya':
-        fruitmoji = emoj[8]
-    elif cutename=='Peach':
-        fruitmoji = emoj[10]
-    elif cutename=='Pear':
-        fruitmoji = emoj[11]
-    elif cutename=='Pineapple':
-        fruitmoji = emoj[12]
-    elif cutename=='Pomegranate':
-        fruitmoji = emoj[8]
-    elif cutename=='Raspberry':
-        fruitmoji = emoj[2]
-    elif cutename=='Strawberry':
-        fruitmoji = emoj[13]
-    elif cutename=='Tomato':
-        fruitmoji = emoj[14]
-    elif cutename=='Watermelon':
-        fruitmoji = emoj[15]
-    elif cutename=='Zucchini':
-        fruitmoji = emoj[16]
+    emoj = {
+        'Apple': '🍎',
+        'Banana': '🍌',
+        'Blueberry': '🍒',
+        'Coconut': '🥥',
+        'Cucumber': '🥒', 
+        'Grapes': '🍇', 
+        'Kiwi': '🥝', 
+        'Lemon': '🍋',
+        'Lime': '🍋',    
+        'Mango':'🥭',
+        'Papaya':'🥭', 
+        'Orange': '🍊',  
+        'Peach': '🍑', 
+        'Pear': '🍐', 
+        'Pineapple': '🍍', 
+        'Pomegranate': '🥭',
+        'Raspberry': '🍒',
+        'Strawberry': '🍓', 
+        'Tomato': '🍅',
+        'Watermelon': '🍉',
+        'Zucchini': '🥬',
+    }
+    fruitmoji = emoj[cutename]
 #endregion parsing emojis
 #region stuff
 
@@ -154,14 +116,22 @@ async def reqs(ctx, nickname: str):
         prev = await ctx.send(lookstr)
         try:
             PLAYER_NAME = nickname
-            data = requests.get("https://api.hypixel.net/player?key="+API_KEY + "&name=" + PLAYER_NAME).json()
-            data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
-            SB_ID = next(iter(data_sb_PATH))
-            print(SB_ID)
             mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
             mojangr = requests.get(mojangu).json()
             UUID = str(mojangr["id"])
-            print(UUID)
+            data = requests.get("https://api.hypixel.net/player?key="+API_KEY + "&name=" + PLAYER_NAME).json()
+            data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
+            profiles = list(data_sb_PATH.keys())
+            d = []
+            for i in range(0, (len(profiles))):
+                sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+profiles[i]).json()
+                d.append(sb_data["profile"]["members"][UUID]["last_save"])     
+            all_save_uuids = dict(zip(profiles, d))
+            try:
+                last_save = max(all_save_uuids, key=all_save_uuids.get)
+            except ValueError:
+                raise TypeError
+            SB_ID = str(last_save)
             sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+SB_ID).json()
             sb_profile = sb_data["profile"]["members"][UUID]
             sb_z_lvl = int(sb_profile["slayer_bosses"]["zombie"]["xp"])
@@ -227,7 +197,11 @@ async def reqs(ctx, nickname: str):
             resp = 'Looks like there is some API errors! Try turning on/asking to turn on all the API in settings!'
             embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
             await prev.edit(embed=embed_error, content='')
-    else:
+        except TypeError:
+            resp = 'Hmm maybe that player doesn\'t exist? Couldn\' get data from API!'
+            embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+            await prev.edit(embed=embed_error, content='')
+    else: 
         resp = 'Invalid command syntaxis!'
         embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
         await prev.edit(embed=embed_error, content='')
@@ -241,23 +215,37 @@ async def sb(ctx, nickname: str):
         prev = await ctx.send(lookstr)
         try:
             PLAYER_NAME = nickname
-            data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + PLAYER_NAME).json()
-            data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
-            SB_ID = next(iter(data_sb_PATH))
-            print(SB_ID)
             mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
             mojangr = requests.get(mojangu).json()
             UUID = str(mojangr["id"])
+            data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + PLAYER_NAME).json()
+            data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
             true_name = data["player"]["knownAliases"][-1]
-            print(UUID)
+            profiles = list(data_sb_PATH.keys())
+            d = []
+            print(profiles)
+            for i in range(0, (len(profiles))):
+                sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+profiles[i]).json()
+                d.append(sb_data["profile"]["members"][UUID]["last_save"])
+            all_save_uuids = dict(zip(profiles, d))
+            print(all_save_uuids)
+            try:
+                last_save = max(all_save_uuids, key=all_save_uuids.get)
+            except ValueError:
+                raise TypeError
+            print(last_save)
+            SB_ID = str(last_save)
             sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+SB_ID).json()
             sb_cute_name = data_sb_PATH[SB_ID]["cute_name"]
             sb = sb_data["profile"]["members"][UUID]
             souls = str(sb["fairy_souls_collected"])
             deaths = str(sb["death_count"])
-            bank_money = int(sb_data["profile"]["banking"]["balance"])
-            purse_money = round(int(sb["coin_purse"]), 1)
-            coins = str(bank_money + purse_money)
+            try:
+                bank_money = int(sb_data["profile"]["banking"]["balance"])
+                purse_money = round(int(sb["coin_purse"]), 1)
+                coins = str(bank_money + purse_money)
+            except KeyError:
+                coins = '<private>'
 
             parsemoji(sb_cute_name)
 
@@ -678,5 +666,6 @@ async def info(ctx):
     await ctx.send(embed=return_embed)
 
 #endregion info
+
 
 bot.run(TOKEN)
