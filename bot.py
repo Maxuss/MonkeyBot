@@ -574,53 +574,52 @@ async def eat(ctx, *, food):
     voidid = '<@381827687775207424>'
     lookstr = 'Monke hungry'
     prev = await ctx.send(lookstr)
-    rs = [
-        'Nah man, not worth it',
-        'Cool but meh',
-        'Neat, yum yum',
-        'Thats some good food',
-        'OO AA BEST MONKE FOOD EVER',
-        'epic food monke love it oo aa'
-    ]
-    if not food:
-        await prev.edit(content='', embed=embed_error,)
-    else:
-        if 'banana' in food.lower():
-            resp = 'yummy yummy monke love bananas ' + pog
-        elif 'coco' in food.lower():
-            resp = 'monke love green coconuts yummy yummy ' + pog
-        elif 'rolet' in food.lower():
-            resp = 'peepeepoopoo :P'
-        elif 'void' in food.lower():
-            resp = 'What a non lets ping him lol. ' + voidmoment
-            resp2 = voidid + ' Get pinged lol noob.'
-        elif 'cross' in food.lower():
-            resp = 'Penguz yum yum'
-        elif 'monke' in food.lower():
-            resp = 'no'
-        elif 'cum' in food.lower():
-            resp = 'tf is wrong with you'
-        elif 'masmig' in food.lower():
-            resp = 'monkey not eat noobs oo aa'
-        elif 'starfruit' in food.lower():
-            resp = 'that will make good wine ngl'
-        elif 'me' in food.lower():
-            resp = 'uh oh stinky'
-        elif 'dead cells' in food.lower():
-            resp = '5bc e z'
-        elif 'chaos' in food.lower():
-            resp = 'flip bad bad'
-        elif 'weiwei' in food.lower():
-            resp = 'wurm'
-        elif 'wurm' in food.lower():
-            resp = 'god'
+    try:
+        if not food:
+                await prev.edit(content='', embed=embed_error,)
         else:
-            resp = choice(rs)
-
-        await prev.edit(content=resp)
-        if resp2:
-            await ctx.send(content=resp2)
+            if food.lower() in multistring:
+                if 'banana' in food.lower():
+                    o = 'banana'
+                elif 'coco' in food.lower():
+                    o = 'coco'
+                elif 'rolet' in food.lower():
+                    o = 'rolet'
+                elif 'void' in food.lower():
+                    o = 'void'
+                    resp2 = voidid + ' nvm get pinged lol noob.'
+                elif 'cross' in food.lower():
+                    o = 'cross'
+                elif 'monke' in food.lower():
+                    o = 'monke'
+                elif 'cum' in food.lower():
+                    o = 'cum'
+                elif 'masmig' in food.lower():
+                    o = 'masmig'
+                elif 'starfruit' in food.lower():
+                    o = 'starfruit'
+                elif 'me' in food.lower():
+                    o = 'me'
+                elif 'dead cells' in food.lower():
+                    o = 'dead cells'
+                elif 'chaos' in food.lower():
+                    o = 'chaos'
+                elif 'weiwei' in food.lower():
+                    o = 'weiwie'
+                elif 'wurm' in food.lower():
+                    o = 'wurm'
+                elif 'gold' in food.lower():
+                    o = 'gold'
+                resp = responses[o]
+            else:
+                resp = choice(responses["default"])
             
+            await prev.edit(content=resp)
+            if resp2:
+                await ctx.send(content=resp2)
+    except UnboundLocalError:
+        pass
+                
 #endregion eat
 #region respond
 @bot.event

@@ -50,3 +50,33 @@ facts = [
     'Monkeys are actually smarter than people.',
     'This Fact isn\'t fun :(.'
 ]
+
+multistring = "banana.green coconut.rolety.void moment.crossmane.monkey.cum.masmig.starfruit.me.dead cells.chaos.weiwei123.wispish wurm.aspect of the gold"
+responses = {
+    "default" = [
+        'Nah man, not worth it',
+        'Cool but meh',
+        'Neat, yum yum',
+        'Thats some good food',
+        'OO AA BEST MONKE FOOD EVER',
+        'epic food monke love it oo aa',
+        'not bad oo aa',
+        'yuck ew',
+        'only gold can eat this trash'
+    ],
+    "banana" = 'yummy yummy monke love bananas ',
+    "coco" = 'monke love green coconuts yummy yummy ',
+    "rolet" = 'peepeepoopoo :P',
+    "void" = 'Ping bad',
+    "cross" = 'Penguz yum yum',
+    "monke" = 'no',
+    "cum" = 'tf is wrong with you',
+    "masmig" = 'monkey not eat noobs oo aa',
+    "starfruit" = 'that will make good wine ngl',
+    "me" = 'uh oh stinky',
+    "dead cells" = '5bc e z',
+    "chaos" = 'flip bad bad',
+    "weiwei" = 'wurm',
+    "wurm" = 'god',
+    "gold" = 'ew'
+}
