@@ -28,7 +28,7 @@ def get_prefix(client, message):
 
     return prefixes[str(message.guild.id)]
 
-bot = commands.Bot(command_prefix=get_prefix)
+bot = commands.Bot(command_prefix=get_prefix, help_command=None)
 
 @bot.event
 async def on_guild_join(guild):
@@ -718,5 +718,26 @@ async def info(ctx):
     await ctx.send(embed=return_embed)
 
 #endregion info
+#region help
+@bot.command()
+async def help(ctx, page=None):
+    hd = 'MB Commands'
+    pref = 'Default prefix: m!'
+    sy = 'Preset: ```command [required param] <optional param>```\n'
+    a = '```help <page>``` - shows this message.\n'
+    b = '```prefix [prefix]``` - sets prefix for current server.\n'
+    c = '```reqs [nickname]``` - checks whether the ```nickname``` can join the guild Macaques.\n'
+    d = '```sb [nickname]``` - shows a bit of stuff from players account.\n'
+    e = '```bz [item]``` - shows all the useful info about item in bazaar.\n'
+    f = '```sky [nickname]``` - sends SkyCrypt link of chosen player.\n'
+    g = '```dungeon [floor] <?frag>``` - Simulates results of a dungeon run. Also supports frag runs on floor 6/7.\n'
+    h = '```eat [item]``` - Makes monkey eat a thing. lol.\n'
+    fullstr = sy + a + b + c + d + e + f + g + h
+    
+    return_embed = discord.Embed(title=hd, description='', color=0xf5ad42)
+    return_embed.add_field(name='Prefix', value=pref, inline=False)
+    return_embed.add_field(name='Commands', value=fullstr, inline=False)
 
+    await ctx.send(embed=return_embed)
+#endregion help
 bot.run(TOKEN)
