@@ -591,38 +591,52 @@ async def eat(ctx, *, food):
         else:
             if 'banana' in food.lower():
                 o = 'banana'
+                resp = responses[o]
             elif 'coco' in food.lower():
                 o = 'coco'
+                resp = responses[o]
             elif 'rolet' in food.lower():
                 o = 'rolet'
+                resp = responses[o]
             elif 'void' in food.lower():
                 o = 'void'
                 resp2 = voidid + ' nvm get pinged lol noob.'
+                resp = responses[o]
             elif 'cross' in food.lower():
                 o = 'cross'
+                resp = responses[o]
             elif 'monke' in food.lower():
                 o = 'monke'
+                resp = responses[o]
             elif 'cum' in food.lower():
                 o = 'cum'
+                resp = responses[o]
             elif 'masmig' in food.lower():
                 o = 'masmig'
+                resp = responses[o]
             elif 'starfruit' in food.lower():
                 o = 'starfruit'
+                resp = responses[o]
             elif 'me' in food.lower():
                 o = 'me'
+                resp = responses[o]
             elif 'dead cells' in food.lower():
                 o = 'dead cells'
+                resp = responses[o]
             elif 'chaos' in food.lower():
                 o = 'chaos'
+                resp = responses[o]
             elif 'weiwei' in food.lower():
                 o = 'weiwie'
+                resp = responses[o]
             elif 'wurm' in food.lower():
                 o = 'wurm'
+                resp = responses[o]
             elif 'gold' in food.lower():
                 o = 'gold'
-            resp = responses[o]
-        else:
-            resp = choice(gc)
+                resp = responses[o]
+            else:
+                resp = choice(gc)
             
             await prev.edit(content=resp)
             if resp2:
