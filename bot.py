@@ -571,6 +571,17 @@ async def dungeons(ctx, floor:str, frag=None):
 #region eat
 @bot.command(name='eat', help='Monke eat. Banana/Coconut/Rolety')
 async def eat(ctx, *, food):
+    gc = [
+        'Nah man, not worth it',
+        'Cool but meh',
+        'Neat, yum yum',
+        'Thats some good food',
+        'OO AA BEST MONKE FOOD EVER',
+        'epic food monke love it oo aa',
+        'not bad oo aa',
+        'yuck ew',
+        'only gold can eat this trash'
+    ]
     voidid = '<@381827687775207424>'
     lookstr = 'Monke hungry'
     prev = await ctx.send(lookstr)
@@ -578,41 +589,40 @@ async def eat(ctx, *, food):
         if not food:
                 await prev.edit(content='', embed=embed_error,)
         else:
-            if food.lower() in multistring:
-                if 'banana' in food.lower():
-                    o = 'banana'
-                elif 'coco' in food.lower():
-                    o = 'coco'
-                elif 'rolet' in food.lower():
-                    o = 'rolet'
-                elif 'void' in food.lower():
-                    o = 'void'
-                    resp2 = voidid + ' nvm get pinged lol noob.'
-                elif 'cross' in food.lower():
-                    o = 'cross'
-                elif 'monke' in food.lower():
-                    o = 'monke'
-                elif 'cum' in food.lower():
-                    o = 'cum'
-                elif 'masmig' in food.lower():
-                    o = 'masmig'
-                elif 'starfruit' in food.lower():
-                    o = 'starfruit'
-                elif 'me' in food.lower():
-                    o = 'me'
-                elif 'dead cells' in food.lower():
-                    o = 'dead cells'
-                elif 'chaos' in food.lower():
-                    o = 'chaos'
+            if 'banana' in food.lower():
+                o = 'banana'
+            elif 'coco' in food.lower():
+                o = 'coco'
+            elif 'rolet' in food.lower():
+                o = 'rolet'
+            elif 'void' in food.lower():
+                o = 'void'
+                resp2 = voidid + ' nvm get pinged lol noob.'
+            elif 'cross' in food.lower():
+                o = 'cross'
+            elif 'monke' in food.lower():
+                o = 'monke'
+            elif 'cum' in food.lower():
+                o = 'cum'
+            elif 'masmig' in food.lower():
+                o = 'masmig'
+            elif 'starfruit' in food.lower():
+                o = 'starfruit'
+            elif 'me' in food.lower():
+                o = 'me'
+            elif 'dead cells' in food.lower():
+                o = 'dead cells'
+            elif 'chaos' in food.lower():
+                o = 'chaos'
                 elif 'weiwei' in food.lower():
-                    o = 'weiwie'
-                elif 'wurm' in food.lower():
-                    o = 'wurm'
-                elif 'gold' in food.lower():
-                    o = 'gold'
-                resp = responses[o]
-            else:
-                resp = choice(responses["default"])
+                o = 'weiwie'
+            elif 'wurm' in food.lower():
+                o = 'wurm'
+            elif 'gold' in food.lower():
+                o = 'gold'
+            resp = responses[o]
+        else:
+            resp = choice(gc)
             
             await prev.edit(content=resp)
             if resp2:
