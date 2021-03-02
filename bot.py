@@ -614,7 +614,7 @@ async def eat(ctx, *, food):
                 o = 'dead cells'
             elif 'chaos' in food.lower():
                 o = 'chaos'
-                elif 'weiwei' in food.lower():
+            elif 'weiwei' in food.lower():
                 o = 'weiwie'
             elif 'wurm' in food.lower():
                 o = 'wurm'
