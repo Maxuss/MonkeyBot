@@ -12,12 +12,13 @@
 
 
 #region imports
-import requests, os, time, asyncio, json, discord, pretty_errors, datetime
+import requests, os, time, asyncio, json, discord, pretty_errors, datetime, io, mpu.io
 from decouple import config
 from random import *
 from discord.utils import get
 from discord.ext import commands
-from data_vars import *
+from data_vars import * 
+from collections import defaultdict
 #endregion imports
 #region prefix
 
@@ -50,7 +51,7 @@ async def on_guild_remove(guild):
         json.dump(prefixes, o, indent=4)
 
 @bot.command(name='prefix',help='Changes prefix for current server.')
-async def ser_prefix(ctx, *, prefix:str):
+async def set_prefix(ctx, *, prefix:str):
     if prefix:
         with open('prefixes.json', 'r') as o:
             prefixes = json.load(o)
@@ -556,6 +557,9 @@ async def dungeons(ctx, floor:str, frag=None):
         return_embed.add_field(name='Profit', value=embed_profit, inline=False)
         return_embed.add_field(name='Items', value=embed_items, inline=False)
         return_embed.add_field(name=tt, value=timetook, inline=False)
+        d = defaultdict(dict)
+        data_id = str(ctx.message.author.id)
+
 
         await prev.edit(embed=return_embed, content='')
         
@@ -563,9 +567,6 @@ async def dungeons(ctx, floor:str, frag=None):
         resp = 'Invalid command syntaxis!'
         embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
         await prev.edit(embed=embed_error, content='')
-    
-
-
 #endregion gamble
 #region eat
 @bot.command(name='eat', help='Monke eat. Banana/Coconut/Rolety')
@@ -657,7 +658,7 @@ async def info(ctx):
     embed_cp = 'Current Patrons:'
     embed_mh = 'MonkeyBot by VoidMoment aka maxus'
     embed_mih = 'Main info you need to know:'
-
+    
     return_embed = discord.Embed(title=embed_mh, description='', color=0xf5ad42)
     return_embed.add_field(name=embed_mih, value=embed_main, inline=False)
     return_embed.add_field(name=embed_ph, value=embed_patre, inline=False)
@@ -666,6 +667,5 @@ async def info(ctx):
     await ctx.send(embed=return_embed)
 
 #endregion info
-
 
 bot.run(TOKEN)
