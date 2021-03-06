@@ -12,7 +12,7 @@
 
 
 #region imports
-import requests, os, time, asyncio, json, discord, datetime, io, platform
+import requests, os, time, asyncio, json, discord, datetime, io, platform, logging
 from decouple import config
 from random import *
 from discord.utils import get
@@ -25,6 +25,19 @@ from aiohttp import ClientSession
 from data import ExitForLoop
 import nest_asyncio as nasync
 nasync.apply()
+LOG = './tmp/ccd.log'
+logging.basicConfig(filename=LOG, filemode="w", level=logging.DEBUG)
+
+# console handler  
+console = logging.StreamHandler()  
+console.setLevel(logging.ERROR)  
+logging.getLogger("").addHandler(console)
+logging.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+logging.debug("STARTED LOGGING SESSION")
+logging.debug("MonkeyBot by Void Moment#8152 (c)")
+logging.debug("DO `m!help` IN DISCORD CLIENT FOR COMMAND INFO")
+logging.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
 API_KEY = dat.API_KEY
 facts = dat.facts
 FACT_STR = dat.FACT_STR
@@ -675,24 +688,26 @@ async def eat(ctx, *, food):
                 
 #endregion eat
 #region respond
-@bot.event
-  
-async def on_message(message):
-    await bot.process_commands(message)
-    if message.author == bot.user:
-        return
-    if 'good bot' in message.content.lower():
-        resp = pog +'Thanks!\nIf you wish to know more about me, visit my GitHub Repository: https://github.com/Maxuss/MonkeyBot/\nThere\'s lots of cool information about me!\nMy creator also has a Patreon page! You can check him out there https://www.patreon.com/maxus_ '
-        await message.channel.send(resp)
-    elif 'monke' in message.content.lower():
-        resp = 'oo oo aa aa monke' + pog + pog + pog
-        await message.channel.send(resp)
-    elif 'macaque' in message.content.lower():
-        resp = 'macaques on top!'
-        await message.channel.send(resp)
-    elif 'eknom' in message.content.lower(): 
-        resp = 'egom yt'
-        await message.channel.send(resp)
+try:
+    @bot.event
+    async def on_message(message):
+        await bot.process_commands(message)
+        if message.author == bot.user:
+            return
+        if 'good bot' in message.content.lower():
+            resp = pog +'Thanks!\nIf you wish to know more about me, visit my GitHub Repository: https://github.com/Maxuss/MonkeyBot/\nThere\'s lots of cool information about me!\nMy creator also has a Patreon page! You can check him out there https://www.patreon.com/maxus_ '
+            await message.channel.send(resp)
+        elif 'monke' in message.content.lower():
+            resp = 'oo oo aa aa monke' + pog + pog + pog
+            await message.channel.send(resp)
+        elif 'macaque' in message.content.lower():
+            resp = 'macaques on top!'
+            await message.channel.send(resp)
+        elif 'eknom' in message.content.lower(): 
+            resp = 'egom yt'
+            await message.channel.send(resp)
+except RuntimeError:
+    pass
 #endregion respond
 #region DEV_CMDS
 #region confirm dev

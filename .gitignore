@@ -9,6 +9,7 @@ __pycache__/
 output/
 .vscode/
 auction/
+tmp/
 
 # Distribution / packaging
 .Python
