@@ -847,7 +847,7 @@ async def ah(ctx, *, item_name:str):
         pglist = list(range(0, pages))
         for i in pglist:
             if 'linux' in str(platform.system()).lower():
-                strr = auctions_path + f'auction/{i}.json'
+                strr = auctions_path + f'/auction/{i}.json'
             else:
                 strr = auctions_path + f'\{i}.json'
             with open(strr, 'r', encoding='utf-8', newline='') as td:
