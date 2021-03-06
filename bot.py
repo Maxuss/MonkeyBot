@@ -24,6 +24,8 @@ from re import search
 from aiohttp import ClientSession
 from data import ExitForLoop
 import nest_asyncio as nasync
+from autocorrect import *
+
 nasync.apply()
 LOG = './tmp/ccd.log'
 logging.basicConfig(filename=LOG, filemode="w", level=logging.DEBUG)
@@ -332,7 +334,7 @@ async def sb(ctx, nickname: str):
 async def bz(ctx, *, item: str):
     start_time = time.time()
     if item:
-        current_item = item.replace(" ", "_").upper()
+        current_item = correctWord(item).replace(" ", "_").upper()
         lookstr = monke + "Looking up for item " + current_item + "..." + FACT_STR + chooseFact()
         prev = await ctx.send(lookstr)
         try:
@@ -821,7 +823,7 @@ def seek_for_item(ah_dat, item_name):
                 if search(item_name.lower(), item.lower()):
                     found = True
                     tah = ah_dat[a]
-                    name = tah["item_name"]
+                    name = tah["item_name"] 
                     lore = tah["item_lore"]
                     trarity = tah["tier"]
                     start_bid = tah["starting_bid"]
