@@ -838,7 +838,7 @@ async def ah(ctx, *, item_name:str):
         prev = await ctx.send(lookstr)
         pages = 0
         if 'linux' in str(platform.system()).lower():   
-            with open('/home/maxusgame897/MonkeyBot/0.json', 'r', encoding='utf-8', newline='') as pagedata:
+            with open('/home/maxusgame897/MonkeyBot/auction/0.json', 'r', encoding='utf-8', newline='') as pagedata:
                 d = json.load(pagedata)
         else:
             with open('.\\auction\\0.json', 'r', encoding='utf-8', newline='') as pagedata:
