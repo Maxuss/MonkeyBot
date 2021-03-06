@@ -838,15 +838,18 @@ async def ah(ctx, *, item_name:str):
         prev = await ctx.send(lookstr)
         pages = 0
         if 'linux' in platform.__name__.lower():   
-            with open('.\\auction\\0.json', 'r', encoding='utf-8', newline='') as pagedata:
+            with open('./auction/0.json', 'r', encoding='utf-8', newline='') as pagedata:
                 d = json.load(pagedata)
         else:
-            with open('./auction/0.json', 'r', encoding='utf-8', newline='') as pagedata:
+            with open('.\\auction\\0.json', 'r', encoding='utf-8', newline='') as pagedata:
                 d = json.load(pagedata)
         pages = d["totalPages"]
         pglist = list(range(0, pages))
         for i in pglist:
-            strr = auctions_path + f'\{i}.json'
+            if 'linux' in platform.__name__.lower():
+                strr = auctions_path + f'/{i}.json'
+            else:
+                strr = auctions_path + f'\{i}.json'
             with open(strr, 'r', encoding='utf-8', newline='') as td:
                 tah_d = json.load(td)
             
