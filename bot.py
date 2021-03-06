@@ -12,7 +12,7 @@
 
 
 #region imports
-import requests, os, time, asyncio, json, discord, datetime, io
+import requests, os, time, asyncio, json, discord, datetime, io, platform
 from decouple import config
 from random import *
 from discord.utils import get
@@ -837,14 +837,19 @@ async def ah(ctx, *, item_name:str):
         lookstr = monke + "Looking up for auction " + item_name + ". Note: Auctions update every 10 minutes, so data you get *might* be a bit outdated! " + FACT_STR + chooseFact()
         prev = await ctx.send(lookstr)
         pages = 0
-        with open('./auction/0.json', 'r', encoding='utf-8', newline='') as pagedata:
-            d = json.load(pagedata)
+        if 'linux' in platform.__name__.lower():   
+            with open('.\\auction\\0.json', 'r', encoding='utf-8', newline='') as pagedata:
+                d = json.load(pagedata)
+        else:
+            with open('./auction/0.json', 'r', encoding='utf-8', newline='') as pagedata:
+                d = json.load(pagedata)
         pages = d["totalPages"]
         pglist = list(range(0, pages))
         for i in pglist:
             strr = auctions_path + f'\{i}.json'
             with open(strr, 'r', encoding='utf-8', newline='') as td:
                 tah_d = json.load(td)
+            
             ah = tah_d["auctions"]
             seek_for_item(ah, item_name)
         
