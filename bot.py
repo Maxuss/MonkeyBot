@@ -35,6 +35,7 @@ monke = dat.monke
 data = dat.data
 voidmoment = dat.voidmoment
 monkey_id = dat.monkey_id
+bz_data = dat.bz_data
 pog = dat.pog
 REQ_SA = dat.REQ_SA
 REQ_SLAYER = dat.REQ_SLAYER
