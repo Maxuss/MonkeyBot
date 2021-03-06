@@ -40,6 +40,7 @@ logging.debug("MonkeyBot by Void Moment#8152 (c)")
 logging.debug("DO `m!help` IN DISCORD CLIENT FOR COMMAND INFO")
 logging.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
+val_channels = dat.val_channels
 API_KEY = dat.API_KEY
 facts = dat.facts
 FACT_STR = dat.FACT_STR
@@ -690,12 +691,13 @@ async def eat(ctx, *, food):
                 
 #endregion eat
 #region respond
-try:
-    @bot.event
-    async def on_message(message):
+
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
+    if str(message.channel.id) in val_channels:
         await bot.process_commands(message)
-        if message.author == bot.user:
-            return
         if 'good bot' in message.content.lower():
             resp = pog +'Thanks!\nIf you wish to know more about me, visit my GitHub Repository: https://github.com/Maxuss/MonkeyBot/\nThere\'s lots of cool information about me!\nMy creator also has a Patreon page! You can check him out there https://www.patreon.com/maxus_ '
             await message.channel.send(resp)
@@ -708,8 +710,17 @@ try:
         elif 'eknom' in message.content.lower(): 
             resp = 'egom yt'
             await message.channel.send(resp)
-except RuntimeError:
-    pass
+    else:
+        if message.content.startswith("m!"):
+            await message.channel.send('Sorry, this isn\'t my channel!')
+        elif 'good bot' in message.content.lower():
+            await message.channel.send('Sorry, this isn\'t my channel!')
+        elif 'monke' in message.content.lower():
+            await message.channel.send('Sorry, this isn\'t my channel!')
+        elif 'macaque' in message.content.lower():
+            await message.channel.send('Sorry, this isn\'t my channel!')
+        elif 'eknom' in message.content.lower(): 
+            await message.channel.send('Sorry, this isn\'t my channel!')
 #endregion respond
 #region DEV_CMDS
 #region confirm dev
@@ -783,7 +794,9 @@ async def help(ctx, page=None):
     g = '```dungeon [floor] <?frag>``` - Simulates results of a dungeon run. Also supports frag runs on floor 6/7.\n'
     h = '```eat [item]``` - Makes monkey eat a thing. lol.\n'
     i = '```bin [item]``` - Shows some info about item on BIN. Might not be the lowest price BIN!'
-    fullstr = sy + a + b + c + d + e + f + g + h + i
+    j = '```lbin [item]``` - Shows cheapest BIN of item.\n'
+    k = '```hbin [item]``` - Shows most expensive BIN of item\n'
+    fullstr = sy + a + b + c + d + e + f + g + h + i + j + k
     
     return_embed = discord.Embed(title=hd, description='', color=0xf5ad42)
     return_embed.add_field(name='Prefix', value=pref, inline=False)
@@ -902,4 +915,151 @@ async def ah(ctx, *, item_name:str):
         embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
         await prev.edit(embed=embed_error, content='')
 #endregion ah
+#region lowest bin
+lbins = []
+@bot.command(name='lbin')
+async def lbin(ctx, *, item_name:str):
+    try:
+        lookstr = monke + "Looking up for cheapest BIN of " + item_name + ". Note: Auctions update every 10 minutes, so data you get *might* be a bit outdated! " + FACT_STR + chooseFact()
+        prev = await ctx.send(lookstr)
+        pages = 0
+        if 'linux' in str(platform.system()).lower():   
+            with open('/home/maxusgame897/MonkeyBot/auction/0.json', 'r', encoding='utf-8', newline='') as pagedata:
+                d = json.load(pagedata)
+        else:
+            with open('.\\auction\\0.json', 'r', encoding='utf-8', newline='') as pagedata:
+                d = json.load(pagedata)
+        pages = d["totalPages"]
+        pglist = list(range(0, pages))
+        for i in pglist:
+            if 'linux' in str(platform.system()).lower():
+                strr = auctions_path + f'/auction/{i}.json'
+            else:
+                strr = auctions_path + f'\{i}.json'
+            with open(strr, 'r', encoding='utf-8', newline='') as td:
+                tah_d = json.load(td)
+            
+            ah = tah_d["auctions"]
+            seek_for_lbin(ah, item_name)
+        d = {}
+        lbins_len = len(lbins) - 1
+        for i in range(0, lbins_len):
+            current = lbins[i]
+            d[f'{i}'] = int(current["price"])
+
+        max_item = min(d, key=d.get)
+        needkey = int(max_item)
+        lowest = lbins[needkey]
+
+
+        name = str(lowest["itemName"])
+        lore = str(lowest["itemLore"])
+        rarity = str(lowest["rarity"])
+        price = lowest["price"]
+        bus = lowest["selling"]
+        stb = 'Price: ' + str(price) + ' coins'
+        titlee = 'Lowest BIN Auction'
+
+        for i in range(0, (len(data_replaceable) - 1)):
+            name = name.replace(data_replaceable[i], data_replaceable_back[i])
+            lore = lore.replace(data_replaceable[i], data_replaceable_back[i])
+            rarity = rarity.replace(data_replaceable[i], data_replaceable_back[i])
+
+        return_embed = discord.Embed(title=titlee, description='', color=0xf5ad42)
+        return_embed.add_field(name=name, value=lore, inline=False)
+        return_embed.add_field(name=bus, value=stb, inline=False)
+
+        await prev.edit(content='', embed=return_embed)
+        lbins.clear()
+    except IndexError:
+        resp = 'Looks like this auction doesn\'t exist, or hardly accessible!'
+        embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+        await prev.edit(embed=embed_error, content='')
+@bot.command(name='hbin')
+async def hbin(ctx, *, item_name:str):
+    try:
+        lookstr = monke + "Looking up for most expensive BIN of " + item_name + ". Note: Auctions update every 10 minutes, so data you get *might* be a bit outdated! " + FACT_STR + chooseFact()
+        prev = await ctx.send(lookstr)
+        pages = 0
+        if 'linux' in str(platform.system()).lower():   
+            with open('/home/maxusgame897/MonkeyBot/auction/0.json', 'r', encoding='utf-8', newline='') as pagedata:
+                d = json.load(pagedata)
+        else:
+            with open('.\\auction\\0.json', 'r', encoding='utf-8', newline='') as pagedata:
+                d = json.load(pagedata)
+        pages = d["totalPages"]
+        pglist = list(range(0, pages))
+        for i in pglist:
+            if 'linux' in str(platform.system()).lower():
+                strr = auctions_path + f'/auction/{i}.json'
+            else:
+                strr = auctions_path + f'\{i}.json'
+            with open(strr, 'r', encoding='utf-8', newline='') as td:
+                tah_d = json.load(td)
+            
+            ah = tah_d["auctions"]
+            seek_for_lbin(ah, item_name)
+        d = {}
+        lbins_len = len(lbins) - 1
+        for i in range(0, lbins_len):
+            current = lbins[i]
+            d[f'{i}'] = int(current["price"])
+
+        max_item = max(d, key=d.get)
+        needkey = int(max_item)
+        lowest = lbins[needkey]
+
+
+        name = str(lowest["itemName"])
+        lore = str(lowest["itemLore"])
+        rarity = str(lowest["rarity"])
+        price = lowest["price"]
+        bus = lowest["selling"]
+        stb = 'Price: ' + str(price) + ' coins'
+        titlee = 'Lowest BIN Auction'
+
+        for i in range(0, (len(data_replaceable) - 1)):
+            name = name.replace(data_replaceable[i], data_replaceable_back[i])
+            lore = lore.replace(data_replaceable[i], data_replaceable_back[i])
+            rarity = rarity.replace(data_replaceable[i], data_replaceable_back[i])
+
+        return_embed = discord.Embed(title=titlee, description='', color=0xf5ad42)
+        return_embed.add_field(name=name, value=lore, inline=False)
+        return_embed.add_field(name=bus, value=stb, inline=False)
+
+        await prev.edit(content='', embed=return_embed)
+        lbins.clear()
+    except IndexError:
+        resp = 'Looks like this auction doesn\'t exist, or hardly accessible!'
+        embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+        await prev.edit(embed=embed_error, content='')
+def seek_for_lbin(ah_dat, item_name):
+    for a in range(len(ah_dat)):
+        vals = list(ah_dat[a].values())
+        for k in range(len(vals)):
+            item = str(vals[k])
+            if search(item_name.lower(), item.lower()):
+                newbin = {}
+                found = True
+                tah = ah_dat[a]
+                name = tah["item_name"] 
+                lore = tah["item_lore"]
+                trarity = tah["tier"]
+                start_bid = tah["starting_bid"]
+                bought = tah["claimed"]
+                bs = 'BIN Auction'
+                rarity = '**' + trarity + '**'
+                stb = 'Price: ' + str(start_bid) + ' coins'
+                titlee = 'LBIN Auction'
+                if bought:
+                    bus = 'Bought!'
+                else:
+                    bus = 'Selling!'
+                newbin["itemName"] = name
+                newbin["itemLore"] = lore
+                newbin["rarity"] = rarity
+                newbin["price"] = start_bid
+                newbin["selling"] = bus
+                lbins.append(newbin)
+#endregion lowest bin
 bot.run(dat.TOKEN)

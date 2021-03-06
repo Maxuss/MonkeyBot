@@ -25,7 +25,14 @@ class DATACENTRE:
 
     obj = json.loads(f)
 
-
+    val_channels = [
+        "814858417675960330",
+        "816761364507787295",
+        "702040764095529040",
+        "702042560557744148",
+        "741750311823081483",
+        "702044494954233896",
+    ]
 
     ANTISPAM = obj["antispam"]
     AS_TIME = obj["antispam_time"]
