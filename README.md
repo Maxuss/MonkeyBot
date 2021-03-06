@@ -10,3 +10,5 @@ Don't forget to check updates.md sometimes! I post most update info here!
 
 Also check todo, it would be cool, thanks.
 
+And please, if you ever encounter a bug... Open an issue, it would mean a lot to me!
+

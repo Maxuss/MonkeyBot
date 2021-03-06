@@ -1,13 +1,15 @@
-# VER. 0.2.1 CHANGES
+# VER. 1.0 CHANGES
 
 ## NEW COMMAND
-`m!prefix [prefix]`
+`m!bin [item]`
 
-Changes prefix of bot. Finally.
+Checks info on item in BIN!
 
-## FIX OF SB AND REQS COMMANDS
+## NOT ENOUGH BUGFIXES!
 
-Now they function properly and display current profile :D!
+I have fixed a total of 14 bugs in this version! If you ever encounter any new ones, please, open an issue!
 
 ## WHAT'S NEXT?
-I'm working on ah command. wait pls. also small bugfixes soon
+Uhh... You'll see...
+
+`Bugfixes > lowest bin > not bin ah > VER. 1.5 > .exe release!`

@@ -12,14 +12,40 @@
 
 
 #region imports
-import requests, os, time, asyncio, json, discord, pretty_errors, datetime, io, mpu.io
+import requests, os, time, asyncio, json, discord, datetime, io
 from decouple import config
 from random import *
 from discord.utils import get
 from discord.ext import commands
-from data_vars import * 
+from data import DATACENTRE as dat
+from data import download_auctions
 from collections import defaultdict
+from re import search
+from aiohttp import ClientSession
+from data import ExitForLoop
+import nest_asyncio as nasync
+nasync.apply()
+API_KEY = dat.API_KEY
+facts = dat.facts
+FACT_STR = dat.FACT_STR
+multistring = dat.multistring
+responses = dat.responses
+auctions_path = dat.auctions_path
+monke = dat.monke
+data = dat.data
+voidmoment = dat.voidmoment
+monkey_id = dat.monkey_id
+pog = dat.pog
+REQ_SA = dat.REQ_SA
+REQ_SLAYER = dat.REQ_SLAYER
 #endregion imports
+#region update ah
+async def fetch_ah_api():
+    while True:
+        download_auctions()
+        print('Auctions will be updated in 10 minutes!')
+        await asyncio.sleep(600)
+#endregion update ah
 #region prefix
 
 def get_prefix(client, message):
@@ -102,9 +128,11 @@ def chooseFact():
 
 @bot.event
 async def on_ready():
-    activity = discord.Game(name=RPC_STATUS, type=3)
+    activity = discord.Game(name=dat.RPC_STATUS, type=3)
     await bot.change_presence(status=discord.Status.online, activity=activity)
+    print("Fetching api...")
     print("Bot is ready!")
+    asyncio.create_task(fetch_ah_api())
 
 
 #endregion stuff
@@ -113,19 +141,19 @@ async def on_ready():
 async def reqs(ctx, nickname: str):
     if nickname:
         start_time = time.time()
-        lookstr = monke + 'Looking up for player ' + nickname + "'s reqs..." + FACT_STR + chooseFact()
+        lookstr = monke + 'Looking up for player ' + nickname + "'s reqs..." + dat.FACT_STR + chooseFact()
         prev = await ctx.send(lookstr)
         try:
             PLAYER_NAME = nickname
             mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
             mojangr = requests.get(mojangu).json()
             UUID = str(mojangr["id"])
-            data = requests.get("https://api.hypixel.net/player?key="+API_KEY + "&name=" + PLAYER_NAME).json()
+            data = requests.get("https://api.hypixel.net/player?key="+ dat.API_KEY + "&name=" + PLAYER_NAME).json()
             data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
             profiles = list(data_sb_PATH.keys())
             d = []
             for i in range(0, (len(profiles))):
-                sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+profiles[i]).json()
+                sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+dat.API_KEY+"&profile="+profiles[i]).json()
                 d.append(sb_data["profile"]["members"][UUID]["last_save"])     
             all_save_uuids = dict(zip(profiles, d))
             try:
@@ -212,7 +240,7 @@ async def reqs(ctx, nickname: str):
 async def sb(ctx, nickname: str):
     if nickname:
         start_time = time.time()
-        lookstr = monke + 'Looking up for player ' + nickname + "..." + FACT_STR + chooseFact()
+        lookstr = monke + 'Looking up for player ' + nickname + "..." + dat.FACT_STR + chooseFact()
         prev = await ctx.send(lookstr)
         try:
             PLAYER_NAME = nickname
@@ -661,6 +689,9 @@ async def on_message(message):
     elif 'macaque' in message.content.lower():
         resp = 'macaques on top!'
         await message.channel.send(resp)
+    elif 'eknom' in message.content.lower(): 
+        resp = 'egom yt'
+        await message.channel.send(resp)
 #endregion respond
 #region DEV_CMDS
 #region confirm dev
@@ -724,6 +755,7 @@ async def help(ctx, page=None):
     hd = 'MB Commands'
     pref = 'Default prefix: m!'
     sy = 'Preset: ```command [required param] <optional param>```\n'
+    ment = 'Note: bot updates auction data every **10** minutes. \nDuring that time bot is immune to all the commands.\n'
     a = '```help <page>``` - shows this message.\n'
     b = '```prefix [prefix]``` - sets prefix for current server.\n'
     c = '```reqs [nickname]``` - checks whether the ```nickname``` can join the guild Macaques.\n'
@@ -732,7 +764,8 @@ async def help(ctx, page=None):
     f = '```sky [nickname]``` - sends SkyCrypt link of chosen player.\n'
     g = '```dungeon [floor] <?frag>``` - Simulates results of a dungeon run. Also supports frag runs on floor 6/7.\n'
     h = '```eat [item]``` - Makes monkey eat a thing. lol.\n'
-    fullstr = sy + a + b + c + d + e + f + g + h
+    i = '```bin [item]``` - Shows some info about item on BIN. Might not be the lowest price BIN!'
+    fullstr = sy + a + b + c + d + e + f + g + h + i
     
     return_embed = discord.Embed(title=hd, description='', color=0xf5ad42)
     return_embed.add_field(name='Prefix', value=pref, inline=False)
@@ -740,4 +773,107 @@ async def help(ctx, page=None):
 
     await ctx.send(embed=return_embed)
 #endregion help
-bot.run(TOKEN)
+#region ah
+data_replaceable = [
+    "§0", "§1", "§2", "§3", "§4", "§5", "§6",
+    "§7", "§8", "§9", "§c", "§e", "§a", "§b",
+    "§d", "§f", "§k", "§l", "§m", "§n", "§o",
+    "§r", "RIGHT CLICK", "COMMON", "RARE",
+    "LEGENDARY", "EPIC", "MYTHIC", "SPECIAL",
+    "VERY SPECIAL", "SUPREME", "Mana Cost",
+    "SWORD", "BOW", "ACCESSORY", "ORB", "BOOTS",
+    "LEGGINGS", "CHESTPLATE", "HELMET", "DUNGEON"
+]
+data_replaceable_back = [
+    "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "",
+    "", "**RIGHT CLICK**", "**COMMON**", "**RARE**",
+    "**LEGENDARY**", "**EPIC**", "**MYTHIC**", "**SPECIAL**",
+    "**VERY SPECIAL**", "**SUPREME**", "_Mana Cost_",
+    "**SWORD**", "**BOW**", "**ACCESSORY**", "**ORB**", "**BOOTS**",
+    "**LEGGINGS**", "**CHESTPLATE**", "**HELMET**", "**DUNGEON**"
+]
+# ah item data: 0name, 1lore, 2rarity, 3starting bid, 4?bought, 5bin auction, 6price, 7title, 8bought ot not
+ahs = []
+def seek_for_item(ah_dat, item_name):
+    try:
+        for a in range(len(ah_dat)):
+            vals = list(ah_dat[a].values())
+            for k in range(len(vals)):
+                item = str(vals[k])
+                if search(item_name.lower(), item.lower()):
+                    found = True
+                    tah = ah_dat[a]
+                    name = tah["item_name"]
+                    lore = tah["item_lore"]
+                    trarity = tah["tier"]
+                    start_bid = tah["starting_bid"]
+                    bought = tah["claimed"]
+                    bs = 'BIN Auction'
+                    rarity = '**' + trarity + '**'
+                    stb = 'Price: ' + str(start_bid) + ' coins'
+                    titlee = 'MB Auction'
+                    if bought:
+                        bus = 'Bought!'
+                    else:
+                        bus = 'Selling!'
+                    ahs.append(name)
+                    ahs.append(lore)
+                    ahs.append(rarity)
+                    ahs.append(start_bid)
+                    ahs.append(bus)
+                    ahs.append(bs)
+                    ahs.append(stb)
+                    ahs.append(titlee)
+                    raise ExitForLoop('filler filler')
+    except ExitForLoop:
+        vals.clear()
+        pass
+
+@bot.command(name='bin')
+async def ah(ctx, *, item_name:str):
+    try:
+        lookstr = monke + "Looking up for auction " + item_name + ". Note: Auctions update every 10 minutes, so data you get *might* be a bit outdated! " + FACT_STR + chooseFact()
+        prev = await ctx.send(lookstr)
+        pages = 0
+        with open('./auction/0.json', 'r', encoding='utf-8', newline='') as pagedata:
+            d = json.load(pagedata)
+        pages = d["totalPages"]
+        pglist = list(range(0, pages))
+        for i in pglist:
+            strr = auctions_path + f'\{i}.json'
+            with open(strr, 'r', encoding='utf-8', newline='') as td:
+                tah_d = json.load(td)
+            ah = tah_d["auctions"]
+            seek_for_item(ah, item_name)
+        
+        # ah item data: 0name, 1lore, 2rarity, 3start_bid, 4?bought, 5bin auction, 6price, 7title, 
+        
+        name = str(ahs[0])
+        lore = str(ahs[1])
+        rarity = str(ahs[2])
+        start_bid = ahs[3]
+        bus = ahs[4]
+        bs = ahs[5]
+        stb = ahs[6]
+        titlee = ahs[7]
+
+        for i in range(0, (len(data_replaceable) - 1)):
+            name = name.replace(data_replaceable[i], data_replaceable_back[i])
+            lore = lore.replace(data_replaceable[i], data_replaceable_back[i])
+            rarity = rarity.replace(data_replaceable[i], data_replaceable_back[i])
+
+
+        return_embed = discord.Embed(title=titlee, description='', color=0xf5ad42)
+        return_embed.add_field(name=name, value=lore, inline=False)
+        return_embed.add_field(name=bus, value=stb, inline=False)
+
+        await prev.edit(content='', embed=return_embed)
+        ahs.clear()
+    except IndexError:
+        resp = 'Looks like this auction doesn\'t exist, or hardly accessible!'
+        embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+        await prev.edit(embed=embed_error, content='')
+#endregion ah
+bot.run(dat.TOKEN)
