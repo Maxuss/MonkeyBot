@@ -794,9 +794,9 @@ data_replaceable = [
     "§0", "§1", "§2", "§3", "§4", "§5", "§6",
     "§7", "§8", "§9", "§c", "§e", "§a", "§b",
     "§d", "§f", "§k", "§l", "§m", "§n", "§o",
-    "§r", "RIGHT CLICK", "COMMON", "RARE",
-    "LEGENDARY", "EPIC", "MYTHIC", "SPECIAL",
-    "VERY SPECIAL", "SUPREME", "Mana Cost",
+    "§r", "RIGHT CLICK", "UNCOMMON", "COMMON", "RARE",
+    "LEGENDARY", "EPIC", "MYTHIC",
+    "VERY SPECIAL", "SPECIAL", "SUPREME", "Mana Cost",
     "SWORD", "BOW", "ACCESSORY", "ORB", "BOOTS",
     "LEGGINGS", "CHESTPLATE", "HELMET", "DUNGEON"
 ]
@@ -804,9 +804,9 @@ data_replaceable_back = [
     "", "", "", "", "", "", "",
     "", "", "", "", "", "", "",
     "", "", "", "", "", "", "",
-    "", "**RIGHT CLICK**", "**COMMON**", "**RARE**",
-    "**LEGENDARY**", "**EPIC**", "**MYTHIC**", "**SPECIAL**",
-    "**VERY SPECIAL**", "**SUPREME**", "_Mana Cost_",
+    "", "**RIGHT CLICK**", "**UNCOMMON**", "**COMMON**", "**RARE**",
+    "**LEGENDARY**", "**EPIC**", "**MYTHIC**", "**VERY SPECIAL**",
+    "**SPECIAL**", "**SUPREME**", "_Mana Cost_",
     "**SWORD**", "**BOW**", "**ACCESSORY**", "**ORB**", "**BOOTS**",
     "**LEGGINGS**", "**CHESTPLATE**", "**HELMET**", "**DUNGEON**"
 ]
