@@ -837,7 +837,7 @@ async def ah(ctx, *, item_name:str):
         lookstr = monke + "Looking up for auction " + item_name + ". Note: Auctions update every 10 minutes, so data you get *might* be a bit outdated! " + FACT_STR + chooseFact()
         prev = await ctx.send(lookstr)
         pages = 0
-        if 'linux' in platform.system.lower():   
+        if 'linux' in str(platform.system()).lower():   
             with open('/home/maxusgame897/MonkeyBot/0.json', 'r', encoding='utf-8', newline='') as pagedata:
                 d = json.load(pagedata)
         else:
@@ -846,7 +846,7 @@ async def ah(ctx, *, item_name:str):
         pages = d["totalPages"]
         pglist = list(range(0, pages))
         for i in pglist:
-            if 'linux' in platform.system.lower():
+            if 'linux' in str(platform.system()).lower():
                 strr = auctions_path + f'/{i}.json'
             else:
                 strr = auctions_path + f'\{i}.json'
