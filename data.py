@@ -39,9 +39,7 @@ class DATACENTRE:
     TOKEN = str(config('DISCORD_TOKEN'))
     RPC_STATUS = "m!help"
     FACT_STR = "Fun Fact: "
-    DEV = str(config('DEV'))
     API_KEY = str(config('API_KEY'))
-    GUILD = str(config('GUILD'))
     PLAYER_NAME = 'maxus_'
     error_response = "Invalid command syntaxis!"
     data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + PLAYER_NAME).json()
