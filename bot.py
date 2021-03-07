@@ -722,12 +722,6 @@ async def info(ctx):
 
 #endregion info
 #region help
-watched_messages = {
-    "messageID": {
-        "➡️": "amount",
-        "⬅️": "amount"
-    }
-}
 @bot.command()
 async def help(ctx, page=None):
     hd = 'MonkeyBot Commands'
