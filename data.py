@@ -87,6 +87,10 @@ class DATACENTRE:
         'I hate school.'
     ]
 
+    pages = [
+        "1", "2", "3"
+    ]
+
     multistring = "banana.green coconut.rolety.void moment.crossmane.monkey.cum.masmig.starfruit.me.dead cells.chaos.weiwei123.wispish wurm.aspect of the gold"
     responses = {
         "banana": 'yummy yummy monke love bananas ',
