@@ -19,6 +19,8 @@ Please note, that Linux OS isn't yet supported.
     1.1) Go to `CODE` button, and click `Download as ZIP`, then extract zip file.
     1.2) Create a new folder anywhere and copy files from MonkeyBot-main there.
     1.3) Move or copy `.env` file there
+    1.4) Add full path to c_transcript.json file into .env like that:
+    `PATH_TO_JSON=<PATH HERE>`
 3. Create a new folder called `auction` in newely created folder
 4. Create a new folder called `tmp` and a file `ccd.log` in it
     NOTE: Make sure file isn't `ccd.log.txt`! It **HAS** to be `ccd.log`, that's important!

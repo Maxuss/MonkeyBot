@@ -38,6 +38,7 @@ class DATACENTRE:
     AS_TIME = obj["antispam_time"]
     TOKEN = str(config('DISCORD_TOKEN'))
     RPC_STATUS = "m!help"
+    PATH_TO_JSON = str(config('PATH_TO_JSON'))
     FACT_STR = "Fun Fact: "
     API_KEY = str(config('API_KEY'))
     PLAYER_NAME = 'maxus_'

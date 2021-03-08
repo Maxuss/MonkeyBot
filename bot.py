@@ -40,6 +40,7 @@ pages = dat.pages
 val_channels = dat.val_channels
 API_KEY = dat.API_KEY
 facts = dat.facts
+PATH_TO_JSON = dat.PATH_TO_JSON
 FACT_STR = dat.FACT_STR
 multistring = dat.multistring
 responses = dat.responses
@@ -250,6 +251,33 @@ async def reqs(ctx, nickname: str):
         await prev.edit(embed=embed_error, content='')
 #endregion req
 #region sb
+async def find_most_recent_profile(prev, nickname):
+    try:
+        PLAYER_NAME = nickname
+        mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
+        mojangr = requests.get(mojangu).json()
+        UUID = str(mojangr["id"])
+        data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + PLAYER_NAME).json()
+        data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
+        true_name = data["player"]["knownAliases"][-1]
+        profiles = list(data_sb_PATH.keys())
+        d = []
+        print(profiles)
+        for i in range(0, (len(profiles))):
+            sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+profiles[i]).json()
+            d.append(sb_data["profile"]["members"][UUID]["last_save"])
+        all_save_uuids = dict(zip(profiles, d))
+        print(all_save_uuids)
+        try:
+            last_save = max(all_save_uuids, key=all_save_uuids.get)
+        except ValueError:
+            raise TypeError
+        print(last_save)
+        return last_save
+    except TypeError:
+        resp = 'Hmm. Maybe player with that nickname doesn\'t exist? Couldn\'t get this player\'s api! Name: "' + nickname + '"'
+        embed_error = discord.Embed(title='Oops!', description=resp, color=0xa30f0f)
+        await prev.edit(embed=embed_error, content='')
 @bot.command(name='sb', help='Shows some data about skyblock profile. WIP for now.')
 async def sb(ctx, nickname: str):
     if nickname:
@@ -257,6 +285,8 @@ async def sb(ctx, nickname: str):
         lookstr = monke + 'Looking up for player ' + nickname + "..." + dat.FACT_STR + chooseFact()
         prev = await ctx.send(lookstr)
         try:
+            
+            last_save = await find_most_recent_profile(prev, nickname)
             PLAYER_NAME = nickname
             mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
             mojangr = requests.get(mojangu).json()
@@ -265,19 +295,8 @@ async def sb(ctx, nickname: str):
             data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
             true_name = data["player"]["knownAliases"][-1]
             profiles = list(data_sb_PATH.keys())
-            d = []
-            print(profiles)
-            for i in range(0, (len(profiles))):
-                sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+profiles[i]).json()
-                d.append(sb_data["profile"]["members"][UUID]["last_save"])
-            all_save_uuids = dict(zip(profiles, d))
-            print(all_save_uuids)
-            try:
-                last_save = max(all_save_uuids, key=all_save_uuids.get)
-            except ValueError:
-                raise TypeError
-            print(last_save)
             SB_ID = str(last_save)
+
             sb_data = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+SB_ID).json()
             sb_cute_name = data_sb_PATH[SB_ID]["cute_name"]
             sb = sb_data["profile"]["members"][UUID]
@@ -1055,6 +1074,76 @@ async def rate(ctx, *, who=None):
     return_embed = discord.Embed(title='Monkey Rate Machine', description=strmonk, color=0xf5ad42)
     await ctx.send(embed=return_embed)
 #endregion monkeyrate
+#region stalk
+@bot.command(name='stalk')
+async def stalk(ctx, nickname, profile=None):
+    # main
+    lookstr = monke + 'Stalking player ' + nickname + "..." + dat.FACT_STR + chooseFact()
+
+    prev = await ctx.send(lookstr)
+    last_login = await find_most_recent_profile(prev, nickname)
+    PLAYER_NAME = nickname
+    mojangu = 'https://api.mojang.com/users/profiles/minecraft/'+PLAYER_NAME+'?'
+    mojangr = requests.get(mojangu).json()
+    UUID = str(mojangr["id"])
+    data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + PLAYER_NAME).json()
+    data_sb_PATH = data["player"]["stats"]["SkyBlock"]["profiles"]
+    true_name = data["player"]["knownAliases"][-1]
+    profiles = list(data_sb_PATH.keys())
+    SB_ID = str(last_login)
+    
+    data = requests.get("https://api.hypixel.net/player?key="+API_KEY+"&name=" + nickname).json()
+    sbat = requests.get("https://api.hypixel.net/skyblock/profile?key="+API_KEY+"&profile="+SB_ID).json()
+    sb_cute_name = data_sb_PATH[SB_ID]["cute_name"]
+    sb = sbat["profile"]["members"][UUID]
+    ts = int(sb["last_save"]) / 1000
+    tsd = int(sb["first_join"]) / 1000
+    # last update/death
+    vlts = datetime.datetime.fromtimestamp(ts)
+    vltsd = datetime.datetime.fromtimestamp(tsd)
+    lastupdated = str(vlts.strftime('%Y-%m-%d %H:%M:%S'))
+    lastdeath = str(vltsd.strftime('%Y-%m-%d %H:%M:%S'))
+
+    dustr = "Last Save: " + lastupdated + " UTC\nFirst Join: " + lastdeath + " UTC"
+
+    # collections
+    colls = sb["collection"]
+    maxcoll = max(colls, key=colls.get)
+    with open(PATH_TO_JSON, 'r') as c:
+        transcript = json.load(c)
+    truemaxcoll = transcript[maxcoll]
+    tmamount = str(colls[maxcoll])
+
+    collstr = truemaxcoll + " is the biggest collection for this player, with amount of " + tmamount
+
+    # last deposit
+    try:
+        mdts = sb_data["banking"]["transaction"][0]["timestamp"] / 1000
+        mdtsvalue = datetime.datetime.fromtimestamp(mdts) 
+        lastdeposittime = str(mdts.strftime('%Y-%m-%d %H:%M:%S'))
+        lastdepositamount = str(sb_data["banking"]["transactions"][0]["amount"])
+        lastdeposittype = sbat["banking"]["transactions"][0]["action"]
+        lastdepositwho = sbat["banking"]["transactions"][0]["initiator_name"]
+        for i in range(0, (len(data_replaceable) - 1)):
+            lastdepositwho = lastdepositwho.replace(data_replaceable[i], data_replaceable_back[i])
+
+        bstr = "Last bank transaction time: " + lastdeposittime + "\nLast bank transaction coin amount: " + lastdepositamount + " coins\nLast bank transaction type: " + lastdeposittype + "\nName of executor of last bank transaction: " + lastdepositwho
+    except KeyError:
+        bstr = "Banking is *private* on this account"
+
+    duh = 'Last Death/Save'
+    ch = 'Collection info'
+    bh = 'Banking transaction info'
+    titlee = 'Stalking ' + nickname
+
+    return_embed = discord.Embed(title=titlee, description='', color=0xf5ad42)
+    return_embed.add_field(name=duh, value=dustr, inline=False)
+    return_embed.add_field(name=ch, value=collstr, inline=False)
+    return_embed.add_field(name=bh, value=bstr, inline=False)
+
+    await prev.edit(content='', embed=return_embed)
+
+#endregion stalk
 #region run
 bot.run(dat.TOKEN)
 #endregion run
